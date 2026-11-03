@@ -1,3 +1,7 @@
+// A window of its own, with no console window behind it, when it's started
+// on Windows
+#![cfg_attr(windows, windows_subsystem = "windows")]
+
 //! Notepad: plain text in tabs, for PatroneOS. Tabs across the title bar,
 //! File, Edit and View menus, find and replace, go to line, word wrap,
 //! zoom, a font of your choice, a light or dark look, and a status bar.

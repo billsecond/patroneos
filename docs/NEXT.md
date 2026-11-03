@@ -151,6 +151,34 @@ Waiting on the user:
   buttons. Other installs, once it's published:
   `sudo apt update && sudo apt install patrone-notepad`.
 
+  **0.2.0 adds Markdown and PatroneOS's fonts** (the user: "allow it to
+  open markdown and edit in markdown just like notepad does but better";
+  "And use the patrone os font's too"): `.md` files show formatted, with a
+  formatting bar, an outline, a switch to the raw Markdown and Export as
+  HTML (`notepad/README.md`, "Markdown"). Installed on PatroneDev from the
+  branch, with `patrone-default-apps` 0.2.3 rebuilt (it now sends
+  `text/markdown` to Notepad). Checked: every Markdown file in the repo
+  (35) shown formatted comes back byte for byte (the ignored test in
+  `formatted.rs`, run in the throwaway shell's display); in the app, six
+  of them (README.md, docs/PLAN.md, NEXT.md, COMPLIANCE.md,
+  branding/README.md, notepad/README.md) opened, moved through, edited
+  back to the same text and saved, identical; the formatted view, ticking
+  tasks, images, rules, tables, code blocks, the formatting keys, the
+  outline, Link, Export as HTML, turning formatting off, and dark mode.
+  `fc-match` gives each of the five PatroneOS families itself, and the
+  font list starts with them.
+
+  **A Windows build** (the user: "Then install it here on this windows
+  environment as well as discribe how to install it on another
+  environemtn"): `notepad/windows/build.ps1` makes a zip whose
+  `install.ps1` installs Patrone Notepad for one account (no
+  administrator, a Start menu entry, no file associations). Not built or
+  run yet: running MSYS2 on the user's PC (unpacked in
+  `%LOCALAPPDATA%\msys64`, its checksum checked) was refused by Claude
+  Code's permission check, so it waits for the user to allow that or to
+  run `build.ps1` themselves. The scripts only parse so far, and whether
+  Pango loads the bundled fonts on Windows (`add_font_file`) is untried.
+
 - **Patrone Software's Featured tab** (the user, 2026-10-31: "please feature
   only for now, the MailCraft, the Artcraft Launcher and the Artcraft PDF
   and the Portal for TEams, Wordcraft, Gridcraft. Add the ScreeGrabCraft

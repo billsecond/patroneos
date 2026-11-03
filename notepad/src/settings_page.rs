@@ -230,7 +230,7 @@ impl Page {
         source.set_valign(gtk::Align::Center);
         content.append(&card(
             crate::app::APP_ID,
-            &format!("Notepad {}", env!("CARGO_PKG_VERSION")),
+            &format!("{} {}", crate::app::APP_NAME, env!("CARGO_PKG_VERSION")),
             "Part of PatroneOS. Free software under the GNU General Public License, version 3 or later.",
             &source,
         ));

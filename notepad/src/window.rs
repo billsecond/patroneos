@@ -18,7 +18,7 @@ use std::rc::{Rc, Weak};
 use gtk::prelude::*;
 use gtk::{gdk, gio, glib, graphene};
 
-use crate::app::{APP_ID, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP, app};
+use crate::app::{APP_ID, APP_NAME, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP, app};
 use crate::dialogs::{self, SaveChoice};
 use crate::document::{self, Encoding, LineEnding};
 use crate::find;
@@ -492,7 +492,7 @@ impl Window {
         let app = app();
         let gtk_window = gtk::ApplicationWindow::builder()
             .application(&app.gtk)
-            .title("Notepad")
+            .title(APP_NAME)
             .icon_name(APP_ID)
             .default_width(960)
             .default_height(640)
@@ -1319,13 +1319,13 @@ impl Window {
         let title = match self.selected() {
             Some(Selected::Doc(tab)) => {
                 format!(
-                    "{}{} - Notepad",
+                    "{}{} - {APP_NAME}",
                     if tab.is_modified() { "*" } else { "" },
                     tab.title()
                 )
             }
-            Some(Selected::Settings) => "Settings - Notepad".into(),
-            None => "Notepad".into(),
+            Some(Selected::Settings) => format!("Settings - {APP_NAME}"),
+            None => APP_NAME.into(),
         };
         self.gtk.set_title(Some(&title));
     }

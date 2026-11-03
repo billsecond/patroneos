@@ -466,6 +466,7 @@ name = "patrone-notepad"
 version = "0.2.0"
 dependencies = [
  "gtk4",
+ "pango",
  "pangocairo",
  "pulldown-cmark",
 ]

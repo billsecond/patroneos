@@ -15,6 +15,13 @@ use crate::tab::Tab;
 use crate::window::Window;
 
 pub const APP_ID: &str = "org.patrone.Notepad";
+/// The name in window titles and About. On Windows it's Patrone Notepad,
+/// so it isn't taken for the system's own text editor.
+pub const APP_NAME: &str = if cfg!(windows) {
+    "Patrone Notepad"
+} else {
+    "Notepad"
+};
 
 /// The smallest and largest zoom, and its steps, in percent.
 pub const ZOOM_MIN: u32 = 10;
@@ -60,6 +67,7 @@ pub fn startup(application: &gtk::Application) {
         started: Cell::new(false),
     });
     APP.with(|cell| *cell.borrow_mut() = Some(app.clone()));
+    load_bundled_fonts();
     app.load_style();
     app.add_actions();
     app.apply_theme();
@@ -493,6 +501,36 @@ impl App {
             }
         }
         self.fonts.load_from_string(&css);
+    }
+}
+
+/// PatroneOS's fonts, when they come with the app rather than the system
+/// (the Windows build: `share/fonts/patroneos` beside its `bin` folder),
+/// loaded for this app alone. Nothing is installed.
+fn load_bundled_fonts() {
+    let Some(folder) = std::env::current_exe().ok().and_then(|exe| {
+        Some(
+            exe.parent()?
+                .parent()?
+                .join("share")
+                .join("fonts")
+                .join("patroneos"),
+        )
+    }) else {
+        return;
+    };
+    let Ok(entries) = std::fs::read_dir(&folder) else {
+        return;
+    };
+    let map = pangocairo::FontMap::default();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        let font = path.extension().is_some_and(|extension| {
+            extension.eq_ignore_ascii_case("ttf") || extension.eq_ignore_ascii_case("otf")
+        });
+        if font && let Err(error) = map.add_font_file(&path) {
+            eprintln!("notepad: couldn't load {}: {error}", path.display());
+        }
     }
 }
 

@@ -165,6 +165,49 @@ It needs GTK 4.22 (`libgtk-4-dev`) and builds with Rust 1.93, Ubuntu
 26.04's. The package: `./packaging/build.sh patrone-notepad -d` on the dev
 VM (`packaging/README.md`).
 
+## Windows
+
+The same code builds for 64-bit Windows 10 and 11 as **Patrone Notepad**
+(`patrone-notepad.exe`; its window titles say Patrone Notepad there too).
+It installs for one account, with no administrator rights, in
+`%LOCALAPPDATA%\Programs\Patrone Notepad`, with a Start menu entry, and
+doesn't change which app opens any kind of file. Its folder has the GTK
+runtime it needs (from MSYS2) and PatroneOS's five fonts, which it loads
+for itself without installing them (`load_bundled_fonts` in `app.rs`,
+through Pango's `add_font_file`). Settings and kept tabs are in
+`%LOCALAPPDATA%\patrone-notepad`.
+
+To build it, on Windows:
+
+1. Rust from rustup (https://rustup.rs).
+2. MSYS2 (https://www.msys2.org), in `%LOCALAPPDATA%\msys64` for one
+   account: unpack `msys2-base-x86_64-DATE.tar.xz` from
+   https://github.com/msys2/msys2-installer/releases there (check it
+   against its `.sha256`), then bring it up to date, twice:
+   `%LOCALAPPDATA%\msys64\usr\bin\bash.exe -lc "pacman -Syuu --noconfirm"`.
+   MSYS2's own installer works too (pass its folder as `-Msys2`).
+3. From this checkout:
+   `powershell -ExecutionPolicy Bypass -File notepad\windows\build.ps1`.
+   The first run installs MSYS2's GTK 4, gcc, pkgconf, librsvg, Adwaita
+   icons and ntldd, and Rust's `stable-x86_64-pc-windows-gnu` toolchain
+   (`-SkipPackages` skips that).
+
+It builds with Rust's `x86_64-pc-windows-gnu` target against MSYS2's
+MINGW64 libraries, then puts the program, every DLL it needs (found with
+`ntldd`), GLib's `gdbus.exe` (which keeps it one process), gdk-pixbuf's
+image loaders, GTK's schemas, the Adwaita and hicolor icons, Notepad's
+icon (also as an `.ico`, drawn from the SVG at seven sizes), the PatroneOS
+fonts release `fonts/release.txt` pins (checked against its checksum),
+and the licences (Notepad's, its Rust crates', each MSYS2 package's, and
+where their source is) in one folder laid out like MSYS2's (`bin`, `lib`,
+`share`), and zips it with `install.ps1`, `uninstall.ps1` and
+`README.txt`: `out\windows\patrone-notepad-VERSION-windows-x86_64.zip`.
+
+To install that zip on a Windows PC: unpack it, run `install.ps1` with
+PowerShell (`powershell -ExecutionPolicy Bypass -File .\install.ps1`), and
+open Patrone Notepad from the Start menu. `uninstall.ps1` removes it
+(`-RemoveSettings` its settings too).
+
 `data/style.css` is the look; `data/over-theme.css` keeps the tabs readable
 under Patrone Settings' title bar styles, and `src/live_style.rs` (the same
 in Patrone's other apps) follows a new theme or title bar button style from

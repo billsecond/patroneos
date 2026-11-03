@@ -13,6 +13,9 @@ publish = false
 gtk = { package = "gtk4", version = "0.11", features = ["gnome_50"] }
 # Printing: drawing the text's lines on the printer's pages
 pangocairo = "0.22"
+# Pango 1.56's add_font_file: PatroneOS's fonts loaded from the app's own
+# folder where the system doesn't have them (the Windows build)
+pango = { version = "0.22", features = ["v1_56"] }
 # Markdown: where its headings, emphasis, links, lists and so on are in the
 # text, for the formatted view, and HTML for Export as HTML
 pulldown-cmark = { version = "0.13", default-features = false, features = ["html"] }
