@@ -83,7 +83,9 @@ if ($cache) {
     $prefix = [regex]::Escape(($mingw -replace '\\', '/') + '/')
     $text = (Get-Content -Raw $cache.FullName) -replace "(?i)`"$prefix", '"'
     $text = $text -replace '(?i)"[a-z]:[\\/][^"]*?[\\/]ucrt64[\\/]', '"'
-    Set-Content -NoNewline -Encoding utf8 $cache.FullName $text
+    # Without a byte order mark (Windows PowerShell's utf8 adds one): gdk-pixbuf
+    # reads it as a loader line and then can't parse the real ones
+    [IO.File]::WriteAllText($cache.FullName, $text, [Text.UTF8Encoding]::new($false))
 }
 
 # Every DLL those need, from MSYS2
