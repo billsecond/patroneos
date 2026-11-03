@@ -744,6 +744,7 @@ impl Window {
             }
         });
         simple("font", |window| window.show_settings());
+        simple("about", |window| crate::about::show(&window.gtk));
         simple("settings", |window| window.show_settings());
         simple("zoom-in", |window| window.zoom(Some(ZOOM_STEP as i32)));
         simple("zoom-out", |window| window.zoom(Some(-(ZOOM_STEP as i32))));

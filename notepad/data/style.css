@@ -3,7 +3,7 @@
    quiet status bar. The palette is set once below and swapped for dark. */
 
 window.notepad, window.go-to-dialog, tooltip, popover {
-  --mica: #eef2f8;
+  --frame: #eef2f8;
   --layer: #f8fafd;
   --surface: #ffffff;
   --divider: #e5e7eb;
@@ -24,7 +24,7 @@ window.notepad, window.go-to-dialog, tooltip, popover {
 
 @media (prefers-color-scheme: dark) {
   window.notepad, window.go-to-dialog, tooltip, popover {
-    --mica: #1d1f23;
+    --frame: #1d1f23;
     --layer: #26282c;
     --surface: #1f2023;
     --divider: #34363a;
@@ -69,7 +69,7 @@ window.notepad.csd:not(.maximized):not(.fullscreen):not(.tiled):not(.tiled-top):
    without one. */
 headerbar.tab-bar,
 headerbar.tab-bar:backdrop {
-  background-color: var(--mica);
+  background-color: var(--frame);
   background-image: none;
   color: var(--text-secondary);
   box-shadow: none;
@@ -363,7 +363,7 @@ menubutton.find-button > button {
 /* --- Settings ------------------------------------------------------------- */
 
 .settings-scroller {
-  background-color: var(--mica);
+  background-color: var(--frame);
 }
 
 .settings-page {

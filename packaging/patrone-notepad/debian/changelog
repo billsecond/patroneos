@@ -22,6 +22,11 @@ patrone-notepad (0.2.0) resolute; urgency=medium
     fonts-patroneos, which it recommended before.
   * Markdown files (text/markdown) open in Notepad.
   * Save with nothing changed leaves the file alone.
+  * Settings › About and licences: Notepad's licence, what it's built
+    with and their licences, and the full texts of its Rust crates'
+    (third-party-licenses.txt.gz). The copyright file names every licence:
+    the crates' (MIT, Apache-2.0, the Unlicense, Unicode-3.0), GTK's and
+    its libraries' (from their own packages) and the fonts' (OFL).
 
  -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 14:00:00 -0600
 

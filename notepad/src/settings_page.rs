@@ -227,12 +227,20 @@ impl Page {
         content.append(&heading("About"));
         let source =
             gtk::LinkButton::with_label("https://github.com/billsecond/patroneos", "Source code");
-        source.set_valign(gtk::Align::Center);
+        let licences = gtk::Button::builder()
+            .label("About and licences")
+            .action_name("win.about")
+            .build();
+        let links = gtk::Box::new(gtk::Orientation::Horizontal, 8);
+        links.set_valign(gtk::Align::Center);
+        links.append(&licences);
+        links.append(&source);
         content.append(&card(
             crate::app::APP_ID,
             &format!("{} {}", crate::app::APP_NAME, env!("CARGO_PKG_VERSION")),
-            "Part of PatroneOS. Free software under the GNU General Public License, version 3 or later.",
-            &source,
+            "Part of PatroneOS. Free software under the GNU General Public License, version 3 or \
+             later, built with GTK, Rust crates and PatroneOS's fonts under their own free licences.",
+            &links,
         ));
 
         let widget = gtk::ScrolledWindow::builder()

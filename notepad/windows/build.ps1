@@ -32,6 +32,8 @@ if (-not (Test-Path $bash)) {
 function Invoke-Msys2([string]$Command) {
     $env:MSYSTEM = 'MINGW64'
     $env:CHERE_INVOKING = '1'
+    # Windows' PATH too, for rustup's rustc and cargo
+    $env:MSYS2_PATH_TYPE = 'inherit'
     & $bash -lc $Command
     if ($LASTEXITCODE -ne 0) { throw "MSYS2: '$Command' failed" }
 }
@@ -66,7 +68,7 @@ $exe = Join-Path $env:CARGO_TARGET_DIR 'release\patrone-notepad.exe'
 $out = Join-Path $root 'out\windows'
 $stage = Join-Path $out 'Patrone Notepad'
 if (Test-Path $stage) { Remove-Item -Recurse -Force $stage }
-foreach ($folder in 'bin', 'lib', 'share\glib-2.0\schemas', 'share\icons', 'share\fonts\patroneos', 'share\licenses') {
+foreach ($folder in 'bin', 'lib', 'share\glib-2.0\schemas', 'share\icons', 'share\fonts\patroneos', 'licenses') {
     New-Item -ItemType Directory -Force (Join-Path $stage $folder) | Out-Null
 }
 Copy-Item $exe "$stage\bin\"
@@ -154,19 +156,23 @@ if (Test-Path $fonts) { Remove-Item -Recurse -Force $fonts }
 Expand-Archive $zip $fonts
 Get-ChildItem -Recurse $fonts -Filter 'PatroneOS*.ttf' | Copy-Item -Destination "$stage\share\fonts\patroneos\"
 Get-ChildItem -Recurse $fonts -Include OFL.txt, FONTLOG.txt | Copy-Item -Destination "$stage\share\fonts\patroneos\"
+Get-ChildItem -Recurse $fonts -Filter OFL.txt | Copy-Item -Destination "$stage\licenses\PatroneOS-fonts-OFL.txt"
 Remove-Item -Recurse -Force $fonts
 
 # --- Licences ------------------------------------------------------------------
-# Notepad's (GPL-3.0-or-later), its Rust crates', and each MSYS2 package
-# whose files are in the folder, with where their source is
-Copy-Item "$root\LICENSE" "$stage\share\licenses\patrone-notepad-LICENSE.txt"
+# In licenses\, which About points to: Notepad's (GPL-3.0-or-later), its
+# Rust crates' (rust-crates.txt, which About shows in full), the fonts'
+# (OFL), and each MSYS2 package's whose files are in the folder, with its
+# version and where its source is (SOURCES.txt). GTK and the rest stay
+# DLLs, unchanged, which anyone can swap for their own build.
+Copy-Item "$root\LICENSE" "$stage\licenses\patrone-notepad-LICENSE.txt"
 Push-Location $notepad
 try {
     cargo +stable-x86_64-pc-windows-gnu vendor --locked --quiet "$out\vendor" | Out-Null
 } finally {
     Pop-Location
 }
-Invoke-Msys2 "bash '$(($root -replace '\\', '/'))/packaging/third-party-licenses.sh' '$(($out -replace '\\', '/'))/vendor' > '$(($stage -replace '\\', '/'))/share/licenses/rust-crates.txt'"
+Invoke-Msys2 "bash '$(($root -replace '\\', '/'))/packaging/third-party-licenses.sh' '$(($out -replace '\\', '/'))/vendor' > '$(($stage -replace '\\', '/'))/licenses/rust-crates.txt'"
 Remove-Item -Recurse -Force "$out\vendor"
 $packages = @{}
 foreach ($dll in @($copied.Keys) + @("$mingw\bin\gdbus.exe")) {
@@ -176,18 +182,20 @@ foreach ($dll in @($copied.Keys) + @("$mingw\bin\gdbus.exe")) {
 foreach ($package in 'mingw-w64-x86_64-gtk4', 'mingw-w64-x86_64-gdk-pixbuf2', 'mingw-w64-x86_64-librsvg', 'mingw-w64-x86_64-adwaita-icon-theme', 'mingw-w64-x86_64-glib2') {
     $packages[$package] = $true
 }
-$sources = @('The GTK runtime in this folder is from MSYS2 (https://www.msys2.org), unchanged.',
-    'Each package''s source is at https://packages.msys2.org/base, and its licence is in this folder.', '')
+$sources = @('The GTK runtime in this folder (the DLLs in bin, lib\gdk-pixbuf-2.0, share\icons and',
+    'share\glib-2.0) is from MSYS2 (https://www.msys2.org), unchanged. Each package below has its',
+    'licence in a folder of its own here, and its source, at that version, from its page.', '')
 foreach ($package in ($packages.Keys | Sort-Object)) {
     $info = & $bash -lc "pacman -Qi $package 2>/dev/null"
     $versionLine = ($info | Select-String '^Version\s*:\s*(.+)$').Matches
     $licenceLine = ($info | Select-String '^Licenses\s*:\s*(.+)$').Matches
     $sources += "$package $(if ($versionLine) { $versionLine[0].Groups[1].Value }): $(if ($licenceLine) { $licenceLine[0].Groups[1].Value })"
+    $sources += "    https://packages.msys2.org/package/$($package)?repo=mingw64"
     $name = $package -replace '^mingw-w64-x86_64-', ''
     $licences = "$mingw\share\licenses\$name"
-    if (Test-Path $licences) { Copy-Item -Recurse $licences "$stage\share\licenses\$name" }
+    if (Test-Path $licences) { Copy-Item -Recurse $licences "$stage\licenses\$name" }
 }
-Set-Content -Encoding utf8 "$stage\share\licenses\SOURCES.txt" $sources
+Set-Content -Encoding utf8 "$stage\licenses\SOURCES.txt" $sources
 
 # --- The zip -------------------------------------------------------------------
 $name = "patrone-notepad-$version-windows-x86_64"

@@ -13,6 +13,7 @@
 //!   notepad [--new-window] [FILE...]
 //!   patrone-notepad [--new-window] [FILE...]
 
+mod about;
 mod app;
 mod dialogs;
 mod document;

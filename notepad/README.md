@@ -154,6 +154,26 @@ the tab's zoom), wrapped to the page, with the file's name at the top of
 each page and "Page N of M" at the bottom. GTK's print dialog sets up the
 page and can print to a PDF file.
 
+## Licences
+
+Notepad is GPL-3.0-or-later. Settings › About and licences shows its
+licence, what it's built with and under which licence (GTK 4, GLib,
+Pango, Cairo, HarfBuzz, gdk-pixbuf and graphene, LGPL-2.1-or-later or
+MIT; the gtk-rs bindings, pulldown-cmark and Rust's standard library, MIT
+or Apache-2.0; PatroneOS's fonts, OFL 1.1), and the full licence texts of
+the 69 Rust crates compiled into it.
+
+- PatroneOS: the package's `copyright` file names every licence, and
+  `third-party-licenses.txt.gz` beside it has each crate's own licence
+  and notices (`packaging/third-party-licenses.sh`). GTK and the rest
+  are Ubuntu's packages, linked as shared libraries, each with its own
+  copyright file; the fonts are `fonts-patroneos`'s.
+- Windows: the zip's `licenses` folder has Notepad's licence, the
+  crates' (`rust-crates.txt`), the fonts' OFL, and each MSYS2 package's
+  licence, with `SOURCES.txt` listing every package, its version and the
+  page its source is on. The GTK libraries stay DLLs, unchanged, which
+  meets the LGPL: anyone can put their own build in their place.
+
 ## Building
 
 ```
