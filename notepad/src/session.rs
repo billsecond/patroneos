@@ -32,6 +32,8 @@ pub struct TabState {
     /// The cursor, in characters from the start.
     pub cursor: i32,
     pub zoom: u32,
+    /// Markdown, or plain text.
+    pub markdown: bool,
     /// A Markdown tab shown formatted (or as typed).
     pub formatted: bool,
     /// A Markdown tab with its preview beside it.
@@ -93,6 +95,7 @@ pub fn save(dir: &Path, windows: &[WindowState]) -> io::Result<()> {
             file.set_string(&group, "line-ending", tab.line_ending.key());
             file.set_integer(&group, "cursor", tab.cursor);
             file.set_integer(&group, "zoom", tab.zoom as i32);
+            file.set_boolean(&group, "markdown", tab.markdown);
             file.set_boolean(&group, "formatted", tab.formatted);
             file.set_boolean(&group, "preview", tab.preview);
             file.set_boolean(&group, "pinned", tab.pinned);
@@ -131,6 +134,11 @@ pub fn load(dir: &Path) -> Vec<WindowState> {
                 continue;
             }
             let uri = file.string(&group, "uri").ok().map(|uri| uri.to_string());
+            // Sessions from before it was kept: a file's by its name
+            let markdown = file.boolean(&group, "markdown").unwrap_or_else(|_| {
+                uri.as_deref()
+                    .is_some_and(crate::markdown::is_markdown_name)
+            });
             let key = file.string(&group, "text").ok().map(|key| key.to_string());
             let text = key
                 .as_deref()
@@ -154,6 +162,7 @@ pub fn load(dir: &Path) -> Vec<WindowState> {
                     .unwrap_or(LineEnding::Lf),
                 cursor: int(&group, "cursor", 0).max(0),
                 zoom: int(&group, "zoom", 100).clamp(10, 500) as u32,
+                markdown,
                 formatted: file.boolean(&group, "formatted").unwrap_or(true),
                 preview: file.boolean(&group, "preview").unwrap_or(false),
                 pinned: file.boolean(&group, "pinned").unwrap_or(false),
@@ -201,6 +210,7 @@ mod tests {
             line_ending: LineEnding::CrLf,
             cursor: 3,
             zoom: 130,
+            markdown: uri.is_none(),
             formatted: key.is_some(),
             preview: uri.is_some(),
             pinned: text.is_none(),

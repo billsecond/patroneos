@@ -12,7 +12,9 @@
 //! close button. A right click has Pin, Close, Close others and Version
 //! history. Settings opens as a tab of its own, at the end.
 //!
-//! A Markdown tab has a formatting bar under the menus (headings, bold,
+//! A tab is Markdown or plain text (the status bar's switch, or View):
+//! new tabs are Markdown while the Markdown setting's on, and files by
+//! their names. A Markdown tab has a formatting bar under the menus (headings, bold,
 //! italic, strikethrough, lists, links, clear formatting, its outline and
 //! its preview beside it), and shows formatted unless the status bar's
 //! switch, or View, says to show it as typed.
@@ -55,7 +57,7 @@ enum DragMode {
 const DRAG_THRESHOLD: f64 = 8.0;
 
 /// The actions that act on a document, which do nothing on Settings.
-const DOCUMENT_ACTIONS: [&str; 25] = [
+const DOCUMENT_ACTIONS: [&str; 26] = [
     "save",
     "save-as",
     "print",
@@ -81,6 +83,7 @@ const DOCUMENT_ACTIONS: [&str; 25] = [
     "history",
     "pin-tab",
     "close-others",
+    "text-mode",
 ];
 
 /// The actions of a Markdown tab's formatting bar.
@@ -124,8 +127,10 @@ struct Status {
     /// The labels of the line endings' and encoding's menu buttons.
     line_ending: gtk::Label,
     encoding: gtk::Label,
-    /// A Markdown tab's switch between formatted and as typed.
-    markdown: gtk::Button,
+    /// The tab's mode, Markdown or Plain text, with a menu to switch it
+    /// and to show Markdown formatted or as typed.
+    markdown: gtk::MenuButton,
+    markdown_label: gtk::Label,
 }
 
 impl Status {
@@ -203,12 +208,17 @@ impl Status {
         let (line_ending_button, line_ending) =
             menu_button(&endings, "Line endings, for when it's saved");
         let (encoding_button, encoding) = menu_button(&encodings, "Encoding, for when it's saved");
-        let markdown = gtk::Button::builder()
-            .label("Formatted")
-            .action_name("win.md-view")
-            .css_classes(["status-item", "status-toggle"])
-            .visible(false)
-            .build();
+        let modes = gio::Menu::new();
+        let kinds = gio::Menu::new();
+        kinds.append(Some("Plain text"), Some("win.text-mode::plain"));
+        kinds.append(Some("Markdown"), Some("win.text-mode::markdown"));
+        modes.append_section(None, &kinds);
+        let shows = gio::Menu::new();
+        shows.append(Some("Show formatted"), Some("win.md-view"));
+        shows.append(Some("Preview beside it"), Some("win.md-preview"));
+        modes.append_section(None, &shows);
+        let (markdown, markdown_label) = menu_button(&modes, "Plain text or Markdown");
+        markdown.set_visible(false);
         let bar = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         bar.add_css_class("status-bar");
         bar.append(&position);
@@ -230,6 +240,7 @@ impl Status {
             line_ending,
             encoding,
             markdown,
+            markdown_label,
         }
     }
 }
@@ -511,6 +522,13 @@ fn menus() -> gio::Menu {
             ("Line numbers", "app.line-numbers"),
             ("Highlight current line", "app.highlight-line"),
             ("Command search…", "win.commands"),
+        ]),
+    );
+    view.append_section(
+        None,
+        &section(&[
+            ("Plain text", "win.text-mode::plain"),
+            ("Markdown", "win.text-mode::markdown"),
         ]),
     );
     view.append_section(
@@ -886,6 +904,27 @@ impl Window {
             }
         });
         self.gtk.add_action(&heading);
+        let mode = gio::SimpleAction::new_stateful(
+            "text-mode",
+            Some(glib::VariantTy::STRING),
+            &"plain".to_variant(),
+        );
+        let weak = self.me.clone();
+        mode.connect_activate(move |_, parameter| {
+            let Some(window) = weak.upgrade() else { return };
+            let Some(tab) = window.selected_tab() else {
+                return;
+            };
+            let markdown = parameter.and_then(|p| p.get::<String>()).as_deref() == Some("markdown");
+            if markdown != tab.markdown.get() {
+                tab.markdown.set(markdown);
+                window.update_markdown(&tab);
+                window.update_words();
+                window.side.refresh();
+                crate::app::app().schedule_session_save();
+            }
+        });
+        self.gtk.add_action(&mode);
         let preview = gio::SimpleAction::new_stateful("md-preview", None, &false.to_variant());
         let weak = self.me.clone();
         preview.connect_activate(move |_, _| {
@@ -1032,6 +1071,9 @@ impl Window {
         }
         self.tabs.borrow_mut().push(tab.clone());
         app.refresh_fonts();
+        // A new tab starts in Markdown while the setting's on: its formatted
+        // view is on from the first letter typed
+        self.update_markdown(&tab);
         tab
     }
 
@@ -1062,6 +1104,7 @@ impl Window {
         tab.encoding.set(encoding);
         tab.line_ending.set(line_ending);
         tab.zoom.set(state.zoom.clamp(ZOOM_MIN, ZOOM_MAX));
+        tab.markdown.set(state.markdown);
         tab.formatted.set(state.formatted);
         tab.preview_on.set(state.preview);
         if state.pinned {
@@ -1881,6 +1924,7 @@ impl Window {
         tab.set_text(&decoded.text);
         tab.encoding.set(decoded.encoding);
         tab.line_ending.set(decoded.line_ending);
+        tab.markdown.set(tab.has_markdown_name());
         tab.session_dirty.set(true);
         self.update_header(&tab);
         self.update_markdown(&tab);
@@ -2009,8 +2053,16 @@ impl Window {
         }
         // Its version history goes with it to its (new) file
         let before = tab.history_id();
+        let renamed = tab
+            .file
+            .borrow()
+            .as_ref()
+            .is_none_or(|old| !old.equal(&file));
         gtk::RecentManager::default().add_item(&file.uri());
         tab.file.replace(Some(file));
+        if renamed {
+            tab.markdown.set(tab.has_markdown_name());
+        }
         tab.encoding.set(encoding);
         if let (Some(before), Some(after)) = (before, tab.history_id())
             && app().settings().restore_session
@@ -2049,17 +2101,22 @@ impl Window {
         let markdown = settings.markdown && tab.as_ref().is_some_and(|tab| tab.is_markdown());
         let formatted = markdown && tab.as_ref().is_some_and(|tab| tab.formatted.get());
         self.format.row.set_visible(markdown);
+        // The switch shows while the Markdown setting's on, so a plain text
+        // tab can become Markdown too
         self.status
             .markdown
-            .set_visible(markdown && settings.status_bar);
+            .set_visible(settings.markdown && settings.status_bar && tab.is_some());
         self.status
-            .markdown
-            .set_label(if formatted { "Formatted" } else { "Markdown" });
-        self.status.markdown.set_tooltip_text(Some(if formatted {
-            "Showing Markdown formatted. Click to show it as typed (Ctrl+Shift+M)"
-        } else {
-            "Showing Markdown as typed. Click to show it formatted (Ctrl+Shift+M)"
-        }));
+            .markdown_label
+            .set_label(match (markdown, formatted) {
+                (false, _) => "Plain text",
+                (true, true) => "Markdown",
+                (true, false) => "Markdown, as typed",
+            });
+        if let Some(action) = self.action("text-mode") {
+            action.set_enabled(settings.markdown && tab.is_some());
+            action.set_state(&(if markdown { "markdown" } else { "plain" }).to_variant());
+        }
         for name in MARKDOWN_ACTIONS {
             if let Some(action) = self.action(name) {
                 action.set_enabled(markdown);

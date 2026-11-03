@@ -83,8 +83,13 @@ kept, and turning it off deletes them.
 
 ## Markdown
 
-A Markdown file (`.md`, `.markdown` and the like) shows formatted while
-you edit it: headings, **bold**, *italic*, ~~strikethrough~~, inline code,
+Each tab is **Markdown** or **plain text**, switched from the status bar
+(its menu also has Show formatted and Preview beside it), View or command
+search. New tabs start in Markdown while Settings › Markdown formatting is
+on; a Markdown file (`.md`, `.markdown` and the like) opens in Markdown and
+any other file in plain text; Save as suggests `.md` or `.txt` to match,
+and saving under a new name switches the tab by that name. A Markdown tab
+shows formatted while you edit it: headings, **bold**, *italic*, ~~strikethrough~~, inline code,
 links, bulleted and numbered lists, task lists with boxes you can tick,
 quotes, code blocks, tables, rules and images. Body text and headings are
 in PatroneOS Sans, code, code blocks and tables in PatroneOS Mono. The
@@ -113,7 +118,7 @@ The **formatting bar** under the menus has:
 | Preview | Ctrl+Alt+P | The document formatted throughout, read only, beside its Markdown, scrolling with it |
 | Outline | | The side panel's outline: the document's headings; choosing one goes to it |
 
-View › Formatted Markdown, or the status bar's Formatted/Markdown switch
+View › Formatted Markdown, or Show formatted in the status bar's menu
 (Ctrl+Shift+M), shows the tab's Markdown as typed instead, in the plain
 text font. File › Export as HTML saves it as a web page (PatroneOS's fonts,
 light styling). Settings › Markdown formatting turns all of it off: Markdown

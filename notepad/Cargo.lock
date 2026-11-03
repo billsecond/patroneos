@@ -463,7 +463,7 @@ dependencies = [
 
 [[package]]
 name = "patrone-notepad"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "gtk4",
  "pango",

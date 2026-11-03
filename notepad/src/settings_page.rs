@@ -203,9 +203,10 @@ impl Page {
         content.append(&card(
             "format-text-bold-symbolic",
             "Markdown formatting",
-            "Show Markdown files (.md) formatted, with a formatting bar: headings, bold, lists, \
-             links, tables, tasks, code and images. They're still saved as the Markdown they are. \
-             Turned off, they're plain text like any other file.",
+            "New tabs and Markdown files (.md) show formatted, with a formatting bar: headings, \
+             bold, lists, links, tables, tasks, code and images, saved as the Markdown they are. \
+             The status bar switches a tab between Markdown and plain text. Turned off, every tab \
+             is plain text.",
             &markdown,
         ));
         content.append(&card(

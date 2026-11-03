@@ -1,3 +1,17 @@
+patrone-notepad (0.3.1) resolute; urgency=medium
+
+  * New tabs are Markdown, formatted as you type, while Settings' Markdown
+    formatting is on. Before, only files named .md were: a new tab never
+    was, though its setting said it should be.
+  * Each tab is Markdown or plain text, switched from the status bar (with
+    Show formatted and Preview beside it in the same menu), View or
+    command search. A .md file opens in Markdown, any other file in plain
+    text, and Save as under a new name switches by its name.
+  * Save as suggests a .md file for a Markdown tab and a .txt file for a
+    plain text one.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 17:00:00 -0600
+
 patrone-notepad (0.3.0) resolute; urgency=medium
 
   * Patrone's own header bar: the side panel's button, the tabs as pills

@@ -182,7 +182,11 @@ pub struct Tab {
     pub history_dirty: Cell<bool>,
     /// A Markdown file's formatted view.
     pub formatter: Rc<Formatter>,
-    /// Whether a Markdown file shows formatted (or as typed).
+    /// Markdown (or plain text): new tabs are Markdown while the Markdown
+    /// setting's on, files by their name, and the status bar or View
+    /// switches it.
+    pub markdown: Cell<bool>,
+    /// Whether a Markdown tab shows formatted (or as typed).
     pub formatted: Cell<bool>,
     /// Whether a Markdown file shows its preview beside it.
     pub preview_on: Cell<bool>,
@@ -241,6 +245,7 @@ impl Tab {
             session_dirty: Cell::new(true),
             history_dirty: Cell::new(false),
             formatter,
+            markdown: Cell::new(crate::app::app().settings().markdown),
             formatted: Cell::new(true),
             preview_on: Cell::new(false),
             preview: RefCell::default(),
@@ -378,8 +383,10 @@ impl Tab {
         None
     }
 
-    /// A file name to suggest when it's first saved: its first line's words.
+    /// A file name to suggest when it's first saved: its first line's words,
+    /// as a .md file in Markdown and a .txt file in plain text.
     pub fn suggested_name(&self) -> String {
+        let extension = if self.markdown.get() { "md" } else { "txt" };
         let name: String = self
             .first_line()
             .unwrap_or_default()
@@ -392,9 +399,9 @@ impl Tab {
             .collect();
         let name = name.trim().trim_end_matches('.');
         if name.is_empty() {
-            "Untitled.txt".into()
+            format!("Untitled.{extension}")
         } else {
-            format!("{name}.txt")
+            format!("{name}.{extension}")
         }
     }
 
@@ -407,8 +414,13 @@ impl Tab {
             .unwrap_or_else(|| "Not saved yet".into())
     }
 
-    /// A Markdown file, by its name.
+    /// A Markdown tab (by its mode, not its file's name).
     pub fn is_markdown(&self) -> bool {
+        self.markdown.get()
+    }
+
+    /// Whether the tab's file is named like a Markdown file.
+    pub fn has_markdown_name(&self) -> bool {
         self.file
             .borrow()
             .as_ref()
@@ -605,6 +617,7 @@ impl Tab {
             line_ending: self.line_ending.get(),
             cursor: self.cursor_offset(),
             zoom: self.zoom.get(),
+            markdown: self.markdown.get(),
             formatted: self.formatted.get(),
             preview: self.preview_on.get(),
             pinned: self.header.is_pinned(),

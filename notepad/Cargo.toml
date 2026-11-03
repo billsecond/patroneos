@@ -1,6 +1,6 @@
 [package]
 name = "patrone-notepad"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2024"
 # Ubuntu 26.04's rustc, which builds the package
 rust-version = "1.93"

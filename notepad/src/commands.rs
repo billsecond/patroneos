@@ -90,6 +90,18 @@ const COMMANDS: &[Command] = &[
         "open tabs recent outline sidebar",
         "app.side-panel",
     ),
+    with(
+        "Markdown",
+        "mode format formatting",
+        "win.text-mode",
+        "markdown",
+    ),
+    with(
+        "Plain text",
+        "mode plain unformatted",
+        "win.text-mode",
+        "plain",
+    ),
     command("Formatted Markdown", "markdown raw as typed", "win.md-view"),
     command(
         "Markdown preview",
