@@ -72,6 +72,9 @@ pub struct Settings {
     pub font_face: String,
     pub font_size: u32,
     pub word_wrap: bool,
+    /// Markdown files shown formatted, with the formatting bar. Off, they're
+    /// plain text like any other.
+    pub markdown: bool,
     pub status_bar: bool,
     pub open_in: OpenIn,
     /// Keep the open tabs and their unsaved changes when Notepad closes,
@@ -90,6 +93,7 @@ impl Default for Settings {
             font_face: DEFAULT_FACE.into(),
             font_size: DEFAULT_SIZE,
             word_wrap: true,
+            markdown: true,
             status_bar: true,
             open_in: OpenIn::NewTab,
             restore_session: true,
@@ -135,6 +139,7 @@ impl Settings {
                 .filter(|size| (4..=400).contains(size))
                 .unwrap_or(default.font_size),
             word_wrap: flag("view", "word-wrap", default.word_wrap),
+            markdown: flag("view", "markdown", default.markdown),
             status_bar: flag("view", "status-bar", default.status_bar),
             open_in: string("files", "open-in")
                 .and_then(|key| OpenIn::ALL.into_iter().find(|open_in| open_in.key() == key))
@@ -152,6 +157,7 @@ impl Settings {
         file.set_string("font", "face", &self.font_face);
         file.set_integer("font", "size", self.font_size as i32);
         file.set_boolean("view", "word-wrap", self.word_wrap);
+        file.set_boolean("view", "markdown", self.markdown);
         file.set_boolean("view", "status-bar", self.status_bar);
         file.set_string("files", "open-in", self.open_in.key());
         file.set_boolean("session", "restore", self.restore_session);
@@ -183,6 +189,7 @@ mod tests {
             font_face: "Bold".into(),
             font_size: 14,
             word_wrap: false,
+            markdown: false,
             status_bar: false,
             open_in: OpenIn::NewWindow,
             restore_session: false,

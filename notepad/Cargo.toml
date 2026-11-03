@@ -1,6 +1,6 @@
 [package]
 name = "patrone-notepad"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 # Ubuntu 26.04's rustc, which builds the package
 rust-version = "1.93"
@@ -13,6 +13,9 @@ publish = false
 gtk = { package = "gtk4", version = "0.11", features = ["gnome_50"] }
 # Printing: drawing the text's lines on the printer's pages
 pangocairo = "0.22"
+# Markdown: where its headings, emphasis, links, lists and so on are in the
+# text, for the formatted view, and HTML for Export as HTML
+pulldown-cmark = { version = "0.13", default-features = false, features = ["html"] }
 
 [profile.release]
 lto = true

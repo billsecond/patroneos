@@ -2,12 +2,15 @@
 //! text (`Tab`).
 
 use std::cell::{Cell, RefCell};
+use std::path::PathBuf;
 use std::rc::Rc;
 
 use gtk::prelude::*;
 use gtk::{gio, glib};
 
 use crate::document::{Encoding, LineEnding};
+use crate::formatted::Formatter;
+use crate::markdown;
 use crate::session::TabState;
 
 /// A tab in the title bar: its name and a close button, which shows a dot
@@ -136,6 +139,10 @@ pub struct Tab {
     pub session_key: RefCell<Option<String>>,
     /// The text changed since the session last kept it.
     pub session_dirty: Cell<bool>,
+    /// A Markdown file's formatted view.
+    pub formatter: Rc<Formatter>,
+    /// Whether a Markdown file shows formatted (or as typed).
+    pub formatted: Cell<bool>,
 }
 
 impl Tab {
@@ -143,7 +150,6 @@ impl Tab {
         let buffer = gtk::TextBuffer::new(None);
         let view = gtk::TextView::builder()
             .buffer(&buffer)
-            .monospace(false)
             .accepts_tab(true)
             .left_margin(12)
             .right_margin(12)
@@ -156,6 +162,8 @@ impl Tab {
             .hexpand(true)
             .vexpand(true)
             .build();
+        let formatter = Formatter::new(&view, &scroller);
+        formatter.set_dark(crate::app::is_dark());
         let tab = Rc::new(Tab {
             id,
             buffer,
@@ -168,6 +176,8 @@ impl Tab {
             zoom: Cell::new(100),
             session_key: RefCell::default(),
             session_dirty: Cell::new(true),
+            formatter,
+            formatted: Cell::new(true),
         });
         tab.set_word_wrap(word_wrap);
         tab
@@ -202,6 +212,24 @@ impl Tab {
             .as_ref()
             .map(|file| file.parse_name().to_string())
             .unwrap_or_else(|| "Untitled".into())
+    }
+
+    /// A Markdown file, by its name.
+    pub fn is_markdown(&self) -> bool {
+        self.file
+            .borrow()
+            .as_ref()
+            .and_then(|file| file.basename())
+            .is_some_and(|name| markdown::is_markdown_name(&name.to_string_lossy()))
+    }
+
+    /// The file's folder, for images and links relative to it.
+    pub fn folder(&self) -> Option<PathBuf> {
+        self.file
+            .borrow()
+            .as_ref()
+            .and_then(|file| file.parent())
+            .and_then(|folder| folder.path())
     }
 
     pub fn is_modified(&self) -> bool {
@@ -275,6 +303,7 @@ impl Tab {
             line_ending: self.line_ending.get(),
             cursor: self.cursor_offset(),
             zoom: self.zoom.get(),
+            formatted: self.formatted.get(),
         }
     }
 }

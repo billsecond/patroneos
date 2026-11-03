@@ -1,3 +1,30 @@
+patrone-notepad (0.2.0) resolute; urgency=medium
+
+  * Markdown: .md files show formatted while they're edited. Headings,
+    bold, italic, strikethrough, inline code, links (Ctrl+click opens
+    them), bulleted, numbered and task lists (their boxes can be ticked),
+    quotes, code blocks, tables, rules and images (from files, by their
+    path or beside the document) show as they'd look, with the markup
+    hidden except on the lines being edited. The text itself doesn't
+    change: opening and saving a file leaves it exactly as it was.
+  * A formatting bar under the menus for Markdown files: the line's heading
+    level (Ctrl+Alt+1 to 6, Ctrl+Alt+0 for text), bold (Ctrl+B), italic
+    (Ctrl+I), strikethrough (Ctrl+Shift+X), bulleted (Ctrl+Shift+8) and
+    numbered (Ctrl+Shift+7) lists, link (Ctrl+K), clear formatting
+    (Ctrl+\), and an outline of the headings to go to one.
+  * View › Formatted Markdown, and a switch in the status bar (Ctrl+Shift+M),
+    show a Markdown file as typed instead; Settings › Markdown formatting
+    turns it off for every file. File › Export as HTML saves a Markdown
+    file as a web page.
+  * PatroneOS's fonts by name: PatroneOS Sans for the app's own words and
+    formatted Markdown, PatroneOS Mono for plain text and code. The font
+    list starts with the five PatroneOS families. Depends on
+    fonts-patroneos, which it recommended before.
+  * Markdown files (text/markdown) open in Notepad.
+  * Save with nothing changed leaves the file alone.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 14:00:00 -0600
+
 patrone-notepad (0.1.0) resolute; urgency=medium
 
   * First package: Notepad, a plain text editor with tabs across the title

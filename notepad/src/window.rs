@@ -6,6 +6,11 @@
 //! Dragging a tab along the title bar reorders the tabs; with only one, it
 //! moves the window, like the rest of the title bar. A middle click closes
 //! a tab. Settings opens as a tab of its own, at the end.
+//!
+//! A Markdown tab has a formatting bar under the menus (headings, bold,
+//! italic, strikethrough, lists, links, clear formatting, and an outline of
+//! its headings), and shows formatted unless the status bar's switch, or
+//! View, says to show it as typed.
 
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -17,6 +22,8 @@ use crate::app::{APP_ID, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP, app};
 use crate::dialogs::{self, SaveChoice};
 use crate::document::{self, Encoding, LineEnding};
 use crate::find;
+use crate::formatted;
+use crate::markdown;
 use crate::session::{TabState, WindowState};
 use crate::settings::Settings;
 use crate::settings_page;
@@ -65,6 +72,31 @@ const DOCUMENT_ACTIONS: [&str; 22] = [
     "close-tab",
 ];
 
+/// The actions of a Markdown tab's formatting bar.
+const MARKDOWN_ACTIONS: [&str; 10] = [
+    "md-heading",
+    "md-bold",
+    "md-italic",
+    "md-strike",
+    "md-bullets",
+    "md-numbers",
+    "md-link",
+    "md-clear",
+    "md-view",
+    "export-html",
+];
+
+/// The heading list's names, for levels 0 (body text) to 6.
+const HEADINGS: [&str; 7] = [
+    "Text",
+    "Heading 1",
+    "Heading 2",
+    "Heading 3",
+    "Heading 4",
+    "Heading 5",
+    "Heading 6",
+];
+
 struct Status {
     bar: gtk::Box,
     position: gtk::Label,
@@ -73,6 +105,8 @@ struct Status {
     /// The labels of the line endings' and encoding's menu buttons.
     line_ending: gtk::Label,
     encoding: gtk::Label,
+    /// A Markdown tab's switch between formatted and as typed.
+    markdown: gtk::Button,
 }
 
 impl Status {
@@ -123,11 +157,18 @@ impl Status {
         let (line_ending_button, line_ending) =
             menu_button(&endings, "Line endings, for when it's saved");
         let (encoding_button, encoding) = menu_button(&encodings, "Encoding, for when it's saved");
+        let markdown = gtk::Button::builder()
+            .label("Formatted")
+            .action_name("win.md-view")
+            .css_classes(["status-item", "status-toggle"])
+            .visible(false)
+            .build();
         let bar = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         bar.add_css_class("status-bar");
         bar.append(&position);
         bar.append(&characters);
         bar.append(&gtk::Box::builder().hexpand(true).build());
+        bar.append(&markdown);
         bar.append(&zoom);
         bar.append(&line_ending_button);
         bar.append(&encoding_button);
@@ -138,6 +179,126 @@ impl Status {
             zoom,
             line_ending,
             encoding,
+            markdown,
+        }
+    }
+}
+
+/// A Markdown tab's formatting bar.
+struct FormatBar {
+    row: gtk::Box,
+    heading: gtk::MenuButton,
+    outline: gtk::MenuButton,
+    outline_list: gtk::ListBox,
+}
+
+impl FormatBar {
+    fn new() -> FormatBar {
+        let headings = gio::Menu::new();
+        for (level, name) in HEADINGS.iter().enumerate() {
+            let item = gio::MenuItem::new(
+                Some(name),
+                Some(&gio::Action::print_detailed_name(
+                    "win.md-heading",
+                    Some(&level.to_string().to_variant()),
+                )),
+            );
+            headings.append_item(&item);
+        }
+        let heading = gtk::MenuButton::builder()
+            .label(HEADINGS[0])
+            .menu_model(&headings)
+            .tooltip_text("Heading (Ctrl+Alt+1 to 6, Ctrl+Alt+0 for text)")
+            .css_classes(["format-heading"])
+            .build();
+        let button = |icon: &str, tooltip: &str, action: &str| {
+            gtk::Button::builder()
+                .icon_name(icon)
+                .tooltip_text(tooltip)
+                .action_name(action)
+                .css_classes(["format-button"])
+                .build()
+        };
+        let separator = || {
+            gtk::Separator::builder()
+                .orientation(gtk::Orientation::Vertical)
+                .css_classes(["format-separator"])
+                .build()
+        };
+        let outline_list = gtk::ListBox::builder()
+            .selection_mode(gtk::SelectionMode::None)
+            .css_classes(["outline-list"])
+            .build();
+        let outline_box = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+        outline_box.append(&gtk::Image::from_icon_name("view-list-symbolic"));
+        outline_box.append(&gtk::Label::new(Some("Outline")));
+        let outline = gtk::MenuButton::builder()
+            .child(&outline_box)
+            .tooltip_text("The document's headings, to go to one")
+            .popover(
+                &gtk::Popover::builder()
+                    .child(
+                        &gtk::ScrolledWindow::builder()
+                            .child(&outline_list)
+                            .hscrollbar_policy(gtk::PolicyType::Never)
+                            .propagate_natural_height(true)
+                            .propagate_natural_width(true)
+                            .max_content_height(420)
+                            .build(),
+                    )
+                    .build(),
+            )
+            .css_classes(["format-outline"])
+            .build();
+        let row = gtk::Box::new(gtk::Orientation::Horizontal, 2);
+        row.add_css_class("format-row");
+        row.append(&heading);
+        row.append(&separator());
+        row.append(&button(
+            "format-text-bold-symbolic",
+            "Bold (Ctrl+B)",
+            "win.md-bold",
+        ));
+        row.append(&button(
+            "format-text-italic-symbolic",
+            "Italic (Ctrl+I)",
+            "win.md-italic",
+        ));
+        row.append(&button(
+            "format-text-strikethrough-symbolic",
+            "Strikethrough (Ctrl+Shift+X)",
+            "win.md-strike",
+        ));
+        row.append(&separator());
+        row.append(&button(
+            "view-list-bullet-symbolic",
+            "Bulleted list (Ctrl+Shift+8)",
+            "win.md-bullets",
+        ));
+        row.append(&button(
+            "view-list-ordered-symbolic",
+            "Numbered list (Ctrl+Shift+7)",
+            "win.md-numbers",
+        ));
+        row.append(&separator());
+        row.append(&button(
+            "insert-link-symbolic",
+            "Link (Ctrl+K)",
+            "win.md-link",
+        ));
+        row.append(&button(
+            "edit-clear-all-symbolic",
+            "Clear formatting (Ctrl+\\)",
+            "win.md-clear",
+        ));
+        row.append(&gtk::Box::builder().hexpand(true).build());
+        row.append(&outline);
+        row.set_visible(false);
+        FormatBar {
+            row,
+            heading,
+            outline,
+            outline_list,
         }
     }
 }
@@ -148,6 +309,7 @@ pub struct Window {
     strip_scroller: gtk::ScrolledWindow,
     stack: gtk::Stack,
     menu_row: gtk::Box,
+    format: FormatBar,
     status: Status,
     pub find: Rc<find::Panel>,
     tabs: RefCell<Vec<Rc<Tab>>>,
@@ -240,7 +402,13 @@ fn menus() -> gio::Menu {
             ("Save all", "win.save-all"),
         ]),
     );
-    file.append_section(None, &section(&[("Print…", "win.print")]));
+    file.append_section(
+        None,
+        &section(&[
+            ("Print…", "win.print"),
+            ("Export as HTML…", "win.export-html"),
+        ]),
+    );
     file.append_section(
         None,
         &section(&[
@@ -295,6 +463,7 @@ fn menus() -> gio::Menu {
             ("Word wrap", "app.word-wrap"),
         ]),
     );
+    view.append_section(None, &section(&[("Formatted Markdown", "win.md-view")]));
 
     let bar = gio::Menu::new();
     bar.append_submenu(Some("File"), &file);
@@ -395,8 +564,10 @@ impl Window {
         let overlay = gtk::Overlay::builder().child(&stack).vexpand(true).build();
         overlay.add_overlay(&find.widget);
         let status = Status::new();
+        let format = FormatBar::new();
         let body = gtk::Box::new(gtk::Orientation::Vertical, 0);
         body.append(&menu_row);
+        body.append(&format.row);
         body.append(&overlay);
         body.append(&status.bar);
         gtk_window.set_child(Some(&body));
@@ -407,6 +578,7 @@ impl Window {
             strip_scroller,
             stack,
             menu_row,
+            format,
             status,
             find,
             tabs: RefCell::default(),
@@ -419,6 +591,15 @@ impl Window {
         });
         window.find.attach(&window);
         window.add_actions();
+        // The outline lists the headings each time it opens
+        if let Some(popover) = window.format.outline.popover() {
+            let weak = Rc::downgrade(&window);
+            popover.connect_show(move |_| {
+                if let Some(window) = weak.upgrade() {
+                    window.fill_outline();
+                }
+            });
+        }
 
         // Files dropped on the text open in tabs. Caught on the way down, so
         // the text view doesn't take them as text.
@@ -509,14 +690,16 @@ impl Window {
                 tab.buffer.redo();
             }
         });
+        // Through the text view's own signals, so a formatted Markdown tab
+        // copies its Markdown (formatted.rs)
         simple("cut", |window| {
             if let Some(tab) = window.selected_tab() {
-                tab.buffer.cut_clipboard(&tab.view.clipboard(), true);
+                tab.view.emit_cut_clipboard();
             }
         });
         simple("copy", |window| {
             if let Some(tab) = window.selected_tab() {
-                tab.buffer.copy_clipboard(&tab.view.clipboard());
+                tab.view.emit_copy_clipboard();
             }
         });
         simple("paste", |window| {
@@ -567,6 +750,53 @@ impl Window {
         simple("zoom-reset", |window| window.zoom(None));
         simple("next-tab", |window| window.cycle(true));
         simple("previous-tab", |window| window.cycle(false));
+
+        // Markdown's formatting bar
+        simple("md-bold", |window| {
+            window.format_text(|buffer| formatted::toggle_wrap(buffer, "**"))
+        });
+        simple("md-italic", |window| {
+            window.format_text(|buffer| formatted::toggle_wrap(buffer, "*"))
+        });
+        simple("md-strike", |window| {
+            window.format_text(|buffer| formatted::toggle_wrap(buffer, "~~"))
+        });
+        simple("md-bullets", |window| {
+            window.format_text(|buffer| formatted::toggle_list(buffer, false))
+        });
+        simple("md-numbers", |window| {
+            window.format_text(|buffer| formatted::toggle_list(buffer, true))
+        });
+        simple("md-clear", |window| {
+            window.format_text(formatted::clear_formatting)
+        });
+        simple("md-link", |window| window.ask_link());
+        simple("export-html", |window| window.export_html());
+        let heading = gio::SimpleAction::new("md-heading", Some(glib::VariantTy::STRING));
+        let weak = self.me.clone();
+        heading.connect_activate(move |_, parameter| {
+            let level = parameter
+                .and_then(|parameter| parameter.get::<String>())
+                .and_then(|level| level.parse::<u8>().ok())
+                .unwrap_or(0)
+                .min(6);
+            if let Some(window) = weak.upgrade() {
+                window.format_text(|buffer| formatted::set_heading(buffer, level));
+            }
+        });
+        self.gtk.add_action(&heading);
+        let view = gio::SimpleAction::new_stateful("md-view", None, &true.to_variant());
+        let weak = self.me.clone();
+        view.connect_activate(move |_, _| {
+            let Some(window) = weak.upgrade() else { return };
+            let Some(tab) = window.selected_tab() else {
+                return;
+            };
+            tab.formatted.set(!tab.formatted.get());
+            window.update_markdown(&tab);
+            crate::app::app().schedule_session_save();
+        });
+        self.gtk.add_action(&view);
 
         // How the selected tab's file is written, from the status bar
         for name in ["line-ending", "encoding"] {
@@ -643,7 +873,12 @@ impl Window {
     pub fn apply_settings(&self, settings: &Settings) {
         for tab in self.tabs() {
             tab.set_word_wrap(settings.word_wrap);
+            let formatted = settings.markdown && tab.is_markdown() && tab.formatted.get();
+            if formatted != tab.formatter.is_active() {
+                tab.formatter.set_active(formatted, tab.folder());
+            }
         }
+        self.sync_markdown(settings);
         self.status.bar.set_visible(
             settings.status_bar && !matches!(self.selected(), Some(Selected::Settings)),
         );
@@ -705,10 +940,12 @@ impl Window {
         tab.encoding.set(encoding);
         tab.line_ending.set(line_ending);
         tab.zoom.set(state.zoom.clamp(ZOOM_MIN, ZOOM_MAX));
+        tab.formatted.set(state.formatted);
         tab.session_key.replace(state.key.clone());
         tab.session_dirty.set(false);
         tab.place_cursor_at(state.cursor.min(tab.buffer.char_count()));
         self.update_header(&tab);
+        self.update_markdown(&tab);
         app().refresh_fonts();
     }
 
@@ -1025,6 +1262,7 @@ impl Window {
         self.update_title();
         self.update_status();
         self.sync_actions();
+        self.sync_markdown(&app().settings());
         self.scroll_to(&header);
         app().schedule_session_save();
     }
@@ -1134,6 +1372,10 @@ impl Window {
         }
         if let Some(action) = self.action("encoding") {
             action.set_state(&tab.encoding.get().key().to_variant());
+        }
+        if self.format.row.is_visible() {
+            let level = formatted::current_heading(buffer) as usize;
+            self.format.heading.set_label(HEADINGS[level.min(6)]);
         }
     }
 
@@ -1324,6 +1566,7 @@ impl Window {
         tab.line_ending.set(decoded.line_ending);
         tab.session_dirty.set(true);
         self.update_header(&tab);
+        self.update_markdown(&tab);
         self.select(Selected::Doc(tab));
     }
 
@@ -1373,6 +1616,10 @@ impl Window {
         let Some(tab) = self.selected_tab() else {
             return;
         };
+        // Nothing to save: the file stays exactly as it is
+        if !save_as && !tab.is_modified() && tab.file.borrow().is_some() {
+            return;
+        }
         let window = self.me();
         glib::spawn_future_local(async move {
             window.save_tab(&tab, save_as).await;
@@ -1450,8 +1697,167 @@ impl Window {
             tab.buffer.set_modified(false);
         }
         self.update_header(tab);
+        // Saved under a new name: Markdown now, or not any more
+        self.update_markdown(tab);
         self.update_status();
         app().schedule_session_save();
         true
+    }
+
+    /// Formatted view on or off for a tab, from its name, the setting and
+    /// its switch.
+    fn update_markdown(&self, tab: &Rc<Tab>) {
+        let settings = app().settings().clone();
+        let formatted = settings.markdown && tab.is_markdown() && tab.formatted.get();
+        tab.formatter.set_active(formatted, tab.folder());
+        if self.is_selected(tab) {
+            self.sync_markdown(&settings);
+        }
+    }
+
+    /// The formatting bar, the status bar's switch and their actions, for
+    /// the tab showing.
+    fn sync_markdown(&self, settings: &Settings) {
+        let tab = self.selected_tab();
+        let markdown = settings.markdown && tab.as_ref().is_some_and(|tab| tab.is_markdown());
+        let formatted = markdown && tab.as_ref().is_some_and(|tab| tab.formatted.get());
+        self.format.row.set_visible(markdown);
+        self.status
+            .markdown
+            .set_visible(markdown && settings.status_bar);
+        self.status
+            .markdown
+            .set_label(if formatted { "Formatted" } else { "Markdown" });
+        self.status.markdown.set_tooltip_text(Some(if formatted {
+            "Showing Markdown formatted. Click to show it as typed (Ctrl+Shift+M)"
+        } else {
+            "Showing Markdown as typed. Click to show it formatted (Ctrl+Shift+M)"
+        }));
+        for name in MARKDOWN_ACTIONS {
+            if let Some(action) = self.action(name) {
+                action.set_enabled(markdown);
+            }
+        }
+        if let Some(action) = self.action("md-view") {
+            action.set_state(&formatted.to_variant());
+        }
+        if markdown && let Some(tab) = tab {
+            let level = formatted::current_heading(&tab.buffer) as usize;
+            self.format.heading.set_label(HEADINGS[level.min(6)]);
+        }
+    }
+
+    /// A formatting command on the selected Markdown tab's text.
+    fn format_text(&self, edit: impl FnOnce(&gtk::TextBuffer)) {
+        let Some(tab) = self.selected_tab().filter(|tab| tab.is_markdown()) else {
+            return;
+        };
+        edit(&tab.buffer);
+        tab.view.grab_focus();
+    }
+
+    /// Link: asks for its text and address, then puts it in.
+    fn ask_link(&self) {
+        let Some(tab) = self.selected_tab().filter(|tab| tab.is_markdown()) else {
+            return;
+        };
+        let text = formatted::selected_text(&tab.buffer);
+        let weak = Rc::downgrade(&tab);
+        dialogs::link(&self.gtk, &text, move |text, url| {
+            if let Some(tab) = weak.upgrade() {
+                formatted::insert_link(&tab.buffer, &text, &url);
+                tab.view.grab_focus();
+            }
+        });
+    }
+
+    /// The outline: each heading, indented by its level; choosing one goes
+    /// to it.
+    fn fill_outline(&self) {
+        let list = &self.format.outline_list;
+        while let Some(row) = list.first_child() {
+            list.remove(&row);
+        }
+        let Some(tab) = self.selected_tab() else {
+            return;
+        };
+        let headings = markdown::parse(&tab.text()).headings;
+        if headings.is_empty() {
+            list.append(
+                &gtk::Label::builder()
+                    .label("No headings yet")
+                    .css_classes(["outline-empty"])
+                    .build(),
+            );
+            return;
+        }
+        for heading in headings {
+            let button = gtk::Button::builder()
+                .child(
+                    &gtk::Label::builder()
+                        .label(if heading.text.is_empty() {
+                            "(untitled)"
+                        } else {
+                            heading.text.as_str()
+                        })
+                        .xalign(0.0)
+                        .ellipsize(gtk::pango::EllipsizeMode::End)
+                        .max_width_chars(48)
+                        .margin_start(12 * (heading.level as i32 - 1))
+                        .build(),
+                )
+                .css_classes(["outline-item", &format!("outline-level-{}", heading.level)])
+                .build();
+            let weak_tab = Rc::downgrade(&tab);
+            let popover = self.format.outline.popover();
+            let start = heading.start as i32;
+            button.connect_clicked(move |_| {
+                if let Some(popover) = &popover {
+                    popover.popdown();
+                }
+                if let Some(tab) = weak_tab.upgrade() {
+                    tab.buffer.place_cursor(&tab.buffer.iter_at_offset(start));
+                    tab.view
+                        .scroll_to_mark(&tab.buffer.get_insert(), 0.0, true, 0.0, 0.1);
+                    tab.view.grab_focus();
+                }
+            });
+            list.append(&button);
+        }
+    }
+
+    /// Export as HTML: the Markdown tab as a web page, in a file chosen now.
+    fn export_html(&self) {
+        let Some(tab) = self.selected_tab().filter(|tab| tab.is_markdown()) else {
+            return;
+        };
+        let window = self.me();
+        glib::spawn_future_local(async move {
+            let title = tab.title();
+            let stem = title
+                .rsplit_once('.')
+                .map(|(stem, _)| stem)
+                .unwrap_or(&title)
+                .to_string();
+            let dialog = gtk::FileDialog::builder()
+                .title("Export as HTML")
+                .accept_label("Export")
+                .initial_name(format!("{stem}.html"))
+                .modal(true)
+                .build();
+            if let Some(folder) = window.dialog_folder() {
+                dialog.set_initial_folder(Some(&folder));
+            }
+            let Ok(file) = dialog.save_future(Some(&window.gtk)).await else {
+                return;
+            };
+            let html = markdown::to_html(&tab.text(), &stem);
+            if let Err((_, error)) = file
+                .replace_contents_future(html.into_bytes(), None, false, gio::FileCreateFlags::NONE)
+                .await
+            {
+                dialogs::error(&window.gtk, "Couldn't export it", error.message()).await;
+            }
+        });
     }
 }

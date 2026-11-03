@@ -3,13 +3,13 @@ Type=Application
 Name=Notepad
 GenericName=Text Editor
 Comment=Write and edit plain text, in tabs
-Keywords=text;editor;plain;txt;notes;notepad;write;edit;
+Keywords=text;editor;plain;txt;notes;notepad;write;edit;markdown;md;
 Exec=patrone-notepad %F
 Icon=org.patrone.Notepad
 Terminal=false
 StartupNotify=true
 Categories=GTK;Utility;TextEditor;
-MimeType=text/plain;application/x-zerosize;
+MimeType=text/plain;text/markdown;text/x-markdown;application/x-zerosize;
 Actions=new-window;
 
 [Desktop Action new-window]

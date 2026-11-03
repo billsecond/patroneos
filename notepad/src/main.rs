@@ -1,6 +1,8 @@
 //! Notepad: plain text in tabs, for PatroneOS. Tabs across the title bar,
 //! File, Edit and View menus, find and replace, go to line, word wrap,
 //! zoom, a font of your choice, a light or dark look, and a status bar.
+//! Markdown files show formatted, with a formatting bar, and save as the
+//! Markdown they are.
 //! By default it keeps the open tabs and their unsaved changes when it
 //! closes and brings them back the next time (Settings turns that off).
 //!
@@ -11,7 +13,9 @@ mod app;
 mod dialogs;
 mod document;
 mod find;
+mod formatted;
 mod live_style;
+mod markdown;
 mod print;
 mod session;
 mod settings;

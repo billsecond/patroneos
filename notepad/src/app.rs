@@ -87,6 +87,15 @@ impl App {
             }
             follow(&settings);
             settings.connect_gtk_interface_color_scheme_notify(follow);
+            // Markdown's formatting colors follow it too
+            settings.connect_gtk_interface_color_scheme_notify(|_| {
+                let dark = is_dark();
+                for window in app().windows() {
+                    for tab in window.tabs() {
+                        tab.formatter.set_dark(dark);
+                    }
+                }
+            });
             settings
                 .bind_property("gtk-interface-color-scheme", &css, "prefers-color-scheme")
                 .sync_create()
@@ -144,6 +153,28 @@ impl App {
             ("win.zoom-out", &["<Control>minus", "<Control>KP_Subtract"]),
             ("win.zoom-reset", &["<Control>0", "<Control>KP_0"]),
             ("win.next-tab", &["<Control>Tab", "<Control>Page_Down"]),
+            // Markdown's formatting, in Markdown tabs
+            ("win.md-bold", &["<Control>b"]),
+            ("win.md-italic", &["<Control>i"]),
+            ("win.md-strike", &["<Control><Shift>x"]),
+            (
+                "win.md-bullets",
+                &["<Control><Shift>8", "<Control>asterisk"],
+            ),
+            (
+                "win.md-numbers",
+                &["<Control><Shift>7", "<Control>ampersand"],
+            ),
+            ("win.md-link", &["<Control>k"]),
+            ("win.md-clear", &["<Control>backslash"]),
+            ("win.md-view", &["<Control><Shift>m"]),
+            ("win.md-heading::0", &["<Control><Alt>0"]),
+            ("win.md-heading::1", &["<Control><Alt>1"]),
+            ("win.md-heading::2", &["<Control><Alt>2"]),
+            ("win.md-heading::3", &["<Control><Alt>3"]),
+            ("win.md-heading::4", &["<Control><Alt>4"]),
+            ("win.md-heading::5", &["<Control><Alt>5"]),
+            ("win.md-heading::6", &["<Control><Alt>6"]),
             (
                 "win.previous-tab",
                 &[
@@ -465,11 +496,33 @@ impl App {
     }
 }
 
-/// The installed font's families, by name.
+/// Whether the app shows dark.
+pub fn is_dark() -> bool {
+    gtk::Settings::default().is_some_and(|settings| {
+        settings.gtk_interface_color_scheme() == gtk::InterfaceColorScheme::Dark
+    })
+}
+
+/// PatroneOS's own font families, which the font list starts with.
+pub const PATRONEOS_FONTS: [&str; 5] = [
+    "PatroneOS Mono",
+    "PatroneOS Sans",
+    "PatroneOS Document",
+    "PatroneOS Serif",
+    "PatroneOS Classic",
+];
+
+/// The installed font families: PatroneOS's first, then the rest by name.
 pub fn font_families() -> Vec<pango::FontFamily> {
     let map = pangocairo::FontMap::default();
     let mut families: Vec<_> = map.list_families().into_iter().collect();
-    families.sort_by_key(|family| family.name().to_lowercase());
+    families.sort_by_key(|family| {
+        let name = family.name();
+        let ours = PATRONEOS_FONTS
+            .iter()
+            .position(|font| *font == name.as_str());
+        (ours.unwrap_or(PATRONEOS_FONTS.len()), name.to_lowercase())
+    });
     families
 }
 

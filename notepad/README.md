@@ -34,7 +34,7 @@ tab. A file that isn't there yet opens empty, and saving makes it.
   - View: Zoom in (Ctrl++), Zoom out (Ctrl+-), Reset zoom (Ctrl+0), also
     Ctrl and the mouse wheel; Status bar; Word wrap.
 - **The text**, plain, in PatroneOS Mono at 11 points unless Settings
-  says otherwise.
+  says otherwise. Markdown files show formatted (below).
 - **The status bar**: the cursor's line and column, the number of
   characters (or how many of them are selected), the tab's zoom, and the
   file's line endings and encoding. Clicking those two changes how the
@@ -47,6 +47,53 @@ tab. A file that isn't there yet opens empty, and saving makes it.
 - Ctrl+Tab and Ctrl+Shift+Tab (or Ctrl+Page Down and Up) go through the
   tabs. Files dropped on the text open in tabs.
 
+## Markdown
+
+A Markdown file (`.md`, `.markdown` and the like) shows formatted while
+you edit it: headings, **bold**, *italic*, ~~strikethrough~~, inline code,
+links, bulleted and numbered lists, task lists with boxes you can tick,
+quotes, code blocks, tables, rules and images. Body text and headings are
+in PatroneOS Sans, code, code blocks and tables in PatroneOS Mono. The
+markup is hidden except on the lines being edited, where it shows faintly,
+so it can be changed like any other text. Ctrl+click opens a link (a web
+address in the browser, a file in its app). Images come from files, by
+their path or relative to the document; nothing is fetched from the
+network.
+
+**The text doesn't change**: the formatted view only styles it and hides
+the markup, so what's saved is the Markdown as typed, and a file opened
+and saved comes back byte for byte. `formatted.rs` has a test that opens
+every Markdown file in this repository that way and checks the bytes
+(`cargo test -- --ignored`, in a desktop session). Copying copies the
+Markdown, hidden markup included.
+
+The **formatting bar** under the menus has:
+
+| Button | Keys | What it does |
+| --- | --- | --- |
+| Heading list | Ctrl+Alt+1 to 6, Ctrl+Alt+0 | The lines as a heading of that level, or body text |
+| Bold, Italic, Strikethrough | Ctrl+B, Ctrl+I, Ctrl+Shift+X | Wraps the selection (or the word at the cursor) in `**`, `*` or `~~`, or takes them off |
+| Bulleted list, Numbered list | Ctrl+Shift+8, Ctrl+Shift+7 | `- ` or `1. ` on each selected line, or off when they all have it |
+| Link | Ctrl+K | Asks for the words and the address: `[words](address)` |
+| Clear formatting | Ctrl+\ | Takes the Markdown off the selection (or the line), leaving the words |
+| Outline | | The document's headings; choosing one goes to it |
+
+View › Formatted Markdown, or the status bar's Formatted/Markdown switch
+(Ctrl+Shift+M), shows the tab's Markdown as typed instead, in the plain
+text font. File › Export as HTML saves it as a web page (PatroneOS's fonts,
+light styling). Settings › Markdown formatting turns all of it off: Markdown
+files are then plain text like any other. A file over a million characters
+stays plain.
+
+## Fonts
+
+Notepad names PatroneOS's own fonts (`fonts-patroneos`, which the package
+depends on) rather than relying on the system's defaults: PatroneOS Sans
+for its menus, tabs, status bar, Settings and dialogs, and for formatted
+Markdown; PatroneOS Mono for plain text (the default in Settings) and
+Markdown's code. Settings' font list starts with the five PatroneOS
+families (Mono, Sans, Document, Serif, Classic), then every other one.
+
 ## Settings
 
 Settings opens as a tab of its own. Every change applies at once, in every
@@ -57,6 +104,7 @@ window, and is kept in `~/.config/patrone-notepad/settings.ini`.
 | Theme | Light, Dark, Same as the desktop | Same as the desktop |
 | Font | Any installed family, its styles, and a size from 8 to 72 points, with a preview | PatroneOS Mono, Regular, 11 |
 | Word wrap | On or off (also View › Word wrap) | On |
+| Markdown formatting | On or off | On |
 | Where files open | In a new tab, In a new window | In a new tab |
 | Restore open tabs | On or off | On |
 

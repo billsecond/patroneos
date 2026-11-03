@@ -1,6 +1,6 @@
 patrone-default-apps (0.2.3) resolute; urgency=medium
 
-  * Plain text files, and empty ones, open in Notepad (patrone-notepad,
+  * Plain text, Markdown and empty files open in Notepad (patrone-notepad,
     now recommended), with GNOME's Text Editor as the fallback when it
     isn't installed.
 

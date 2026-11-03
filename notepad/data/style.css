@@ -44,6 +44,13 @@ window.notepad, window.go-to-dialog, tooltip, popover {
   }
 }
 
+/* The app's own words (menus, tabs, the status bar, Settings, dialogs)
+   in PatroneOS Sans; the text is in Notepad's font (PatroneOS Mono unless
+   Settings says otherwise), set for each tab by app.rs. */
+window, popover, tooltip {
+  font-family: "PatroneOS Sans", sans-serif;
+}
+
 window.notepad {
   background-color: var(--surface);
   color: var(--text);
@@ -169,6 +176,95 @@ button.settings-button {
   color: var(--text);
 }
 
+/* --- Markdown's formatting bar -------------------------------------------- */
+
+.format-row {
+  background-color: var(--layer);
+  border-bottom: 1px solid var(--divider);
+  padding: 3px 8px;
+}
+
+button.format-button,
+menubutton.format-heading > button,
+menubutton.format-outline > button {
+  background: none;
+  border: none;
+  box-shadow: none;
+  min-height: 28px;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+button.format-button {
+  min-width: 30px;
+  padding: 0;
+}
+
+menubutton.format-heading > button {
+  min-width: 104px;
+  padding: 0 8px;
+  font-weight: normal;
+}
+
+menubutton.format-outline > button {
+  padding: 0 10px;
+  font-weight: normal;
+}
+
+button.format-button:hover,
+menubutton.format-heading > button:hover,
+menubutton.format-outline > button:hover {
+  background-color: var(--hover);
+}
+
+button.format-button:active {
+  background-color: var(--pressed);
+}
+
+.format-separator {
+  margin: 6px 4px;
+  background-color: var(--divider);
+  min-width: 1px;
+}
+
+.outline-list {
+  background: none;
+  padding: 4px;
+}
+
+button.outline-item {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-weight: normal;
+}
+
+button.outline-item:hover {
+  background-color: var(--hover);
+}
+
+button.outline-level-1 {
+  font-weight: 600;
+}
+
+.outline-empty {
+  padding: 8px 12px;
+  color: var(--text-secondary);
+}
+
+/* What the formatted view lays over the text: task checkboxes, rules and
+   images (formatted.rs) */
+textview.editor separator.md-rule {
+  background-color: var(--divider);
+  min-height: 2px;
+}
+
+textview.editor picture.md-image {
+  border-radius: 6px;
+}
+
 /* --- The text ------------------------------------------------------------- */
 
 textview.editor,
@@ -205,6 +301,22 @@ textview.editor > text > selection {
 
 .status-bar > menubutton.status-item {
   padding: 0 4px;
+}
+
+button.status-toggle {
+  background: none;
+  border: none;
+  border-left: 1px solid var(--divider);
+  border-radius: 0;
+  box-shadow: none;
+  min-height: 22px;
+  padding: 0 14px;
+  font-weight: normal;
+  color: inherit;
+}
+
+button.status-toggle:hover {
+  background-color: var(--hover);
 }
 
 menubutton.status-menu > button {

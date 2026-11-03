@@ -32,6 +32,8 @@ pub struct TabState {
     /// The cursor, in characters from the start.
     pub cursor: i32,
     pub zoom: u32,
+    /// A Markdown tab shown formatted (or as typed).
+    pub formatted: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -88,6 +90,7 @@ pub fn save(dir: &Path, windows: &[WindowState]) -> io::Result<()> {
             file.set_string(&group, "line-ending", tab.line_ending.key());
             file.set_integer(&group, "cursor", tab.cursor);
             file.set_integer(&group, "zoom", tab.zoom as i32);
+            file.set_boolean(&group, "formatted", tab.formatted);
         }
     }
     glib::file_set_contents(dir.join(INDEX), file.to_data().as_bytes())
@@ -146,6 +149,7 @@ pub fn load(dir: &Path) -> Vec<WindowState> {
                     .unwrap_or(LineEnding::Lf),
                 cursor: int(&group, "cursor", 0).max(0),
                 zoom: int(&group, "zoom", 100).clamp(10, 500) as u32,
+                formatted: file.boolean(&group, "formatted").unwrap_or(true),
             });
         }
         if tabs.is_empty() {
@@ -190,6 +194,7 @@ mod tests {
             line_ending: LineEnding::CrLf,
             cursor: 3,
             zoom: 130,
+            formatted: key.is_some(),
         }
     }
 

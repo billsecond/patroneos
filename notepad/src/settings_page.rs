@@ -19,6 +19,7 @@ pub struct Page {
     face: gtk::DropDown,
     size: gtk::DropDown,
     word_wrap: gtk::Switch,
+    markdown: gtk::Switch,
     open_in: gtk::DropDown,
     restore: gtk::Switch,
     families: Vec<String>,
@@ -118,6 +119,7 @@ impl Page {
         let size = dropdown(&strings(sizes.iter().map(String::as_str)));
         size.set_width_request(90);
         let word_wrap = gtk::Switch::builder().valign(gtk::Align::Center).build();
+        let markdown = gtk::Switch::builder().valign(gtk::Align::Center).build();
         let open_in = dropdown(&strings(OpenIn::ALL.iter().map(|open_in| open_in.label())));
         let restore = gtk::Switch::builder().valign(gtk::Align::Center).build();
 
@@ -194,6 +196,14 @@ impl Page {
             "Fit long lines to the window's width",
             &word_wrap,
         ));
+        content.append(&card(
+            "format-text-bold-symbolic",
+            "Markdown formatting",
+            "Show Markdown files (.md) formatted, with a formatting bar: headings, bold, lists, \
+             links, tables, tasks, code and images. They're still saved as the Markdown they are. \
+             Turned off, they're plain text like any other file.",
+            &markdown,
+        ));
 
         content.append(&heading("Files"));
         content.append(&card(
@@ -240,6 +250,7 @@ impl Page {
             face,
             size,
             word_wrap,
+            markdown,
             open_in,
             restore,
             families,
@@ -303,6 +314,11 @@ impl Page {
         });
         self.word_wrap.connect_active_notify(move |_| run());
         let run = on(|page| {
+            let on = page.markdown.is_active();
+            app().update_settings(|settings| settings.markdown = on);
+        });
+        self.markdown.connect_active_notify(move |_| run());
+        let run = on(|page| {
             let open_in =
                 OpenIn::ALL[(page.open_in.selected() as usize).min(OpenIn::ALL.len() - 1)];
             app().update_settings(|settings| settings.open_in = open_in);
@@ -354,6 +370,7 @@ impl Page {
             .map(|(index, _)| index);
         self.size.set_selected(index(nearest));
         self.word_wrap.set_active(settings.word_wrap);
+        self.markdown.set_active(settings.markdown);
         self.open_in.set_selected(index(
             OpenIn::ALL
                 .iter()

@@ -1,4 +1,4 @@
-//! The questions Notepad asks, and Go to line.
+//! The questions Notepad asks, Go to line, and Markdown's Link.
 
 use std::rc::Rc;
 
@@ -175,4 +175,96 @@ pub fn go_to_line(parent: &gtk::ApplicationWindow, tab: &Rc<Tab>) {
     dialog.present();
     entry.grab_focus();
     entry.select_region(0, -1);
+}
+
+/// Link: its text and its address. `insert` gets both once Insert's
+/// pressed.
+pub fn link(
+    parent: &gtk::ApplicationWindow,
+    text: &str,
+    insert: impl Fn(String, String) + 'static,
+) {
+    let dialog = gtk::Window::builder()
+        .title("Link")
+        .modal(true)
+        .transient_for(parent)
+        .resizable(false)
+        .default_width(420)
+        .build();
+    dialog.add_css_class("go-to-dialog");
+    let text_entry = gtk::Entry::builder()
+        .text(text)
+        .placeholder_text("The words to show")
+        .activates_default(true)
+        .build();
+    let url_entry = gtk::Entry::builder()
+        .placeholder_text("https://… or a file's name")
+        .input_purpose(gtk::InputPurpose::Url)
+        .activates_default(true)
+        .build();
+    let cancel = gtk::Button::with_label("Cancel");
+    let ok = gtk::Button::builder()
+        .label("Insert")
+        .css_classes(["suggested-action"])
+        .sensitive(false)
+        .build();
+    let buttons = gtk::Box::builder()
+        .orientation(gtk::Orientation::Horizontal)
+        .spacing(8)
+        .halign(gtk::Align::End)
+        .homogeneous(true)
+        .build();
+    buttons.append(&ok);
+    buttons.append(&cancel);
+    let content = gtk::Box::builder()
+        .orientation(gtk::Orientation::Vertical)
+        .spacing(8)
+        .css_classes(["go-to-content"])
+        .build();
+    content.append(&gtk::Label::builder().label("Text").xalign(0.0).build());
+    content.append(&text_entry);
+    content.append(&gtk::Label::builder().label("Address").xalign(0.0).build());
+    content.append(&url_entry);
+    content.append(&buttons);
+    dialog.set_child(Some(&content));
+    dialog.set_default_widget(Some(&ok));
+
+    let ready = ok.clone();
+    url_entry.connect_changed(move |entry| ready.set_sensitive(!entry.text().trim().is_empty()));
+    let weak_dialog = dialog.downgrade();
+    let (words, address) = (text_entry.clone(), url_entry.clone());
+    ok.connect_clicked(move |_| {
+        let url = address.text().trim().to_string();
+        if url.is_empty() {
+            return;
+        }
+        insert(words.text().to_string(), url);
+        if let Some(dialog) = weak_dialog.upgrade() {
+            dialog.close();
+        }
+    });
+    let weak_dialog = dialog.downgrade();
+    cancel.connect_clicked(move |_| {
+        if let Some(dialog) = weak_dialog.upgrade() {
+            dialog.close();
+        }
+    });
+    let keys = gtk::EventControllerKey::new();
+    let weak_dialog = dialog.downgrade();
+    keys.connect_key_pressed(move |_, key, _, _| {
+        if key == gdk::Key::Escape
+            && let Some(dialog) = weak_dialog.upgrade()
+        {
+            dialog.close();
+            return glib::Propagation::Stop;
+        }
+        glib::Propagation::Proceed
+    });
+    dialog.add_controller(keys);
+    dialog.present();
+    if text.is_empty() {
+        text_entry.grab_focus();
+    } else {
+        url_entry.grab_focus();
+    }
 }
