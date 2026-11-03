@@ -10,11 +10,12 @@ Vcs-Git: https://github.com/billsecond/patroneos.git
 Package: patrone-default-apps
 Architecture: all
 Depends: ${misc:Depends}, patrone-browser-chooser
-Recommends: patrone-file-manager, patrone-terminal, patrone-unpack
+Recommends: patrone-file-manager, patrone-notepad, patrone-terminal, patrone-unpack
 Description: PatroneOS's default apps
  PatroneOS comes with no web browser: until one's installed, web links
  open Patrone Browser Chooser, which asks which one to install. Whichever
  browser is installed then opens them, and comes first in the favorites,
  with Patrone Terminal. Folders open in Patrone File Manager, which takes
- Ubuntu's Files' place in the favorites, and archives, .deb packages and
- Flatpak files in Patrone Unpack. Users' own choices still win.
+ Ubuntu's Files' place in the favorites, archives, .deb packages and
+ Flatpak files in Patrone Unpack, and plain text in Notepad. Users' own
+ choices still win.

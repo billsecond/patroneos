@@ -1,0 +1,30 @@
+Source: patrone-notepad
+Section: editors
+Priority: optional
+Maintainer: William Daugherty <31995458+billsecond@users.noreply.github.com>
+Build-Depends: debhelper-compat (= 13),
+               cargo (>= 1.93),
+               rustc (>= 1.93),
+               libgtk-4-dev,
+               pkgconf
+Standards-Version: 4.7.0
+Rules-Requires-Root: no
+Vcs-Git: https://github.com/billsecond/patroneos.git
+
+Package: patrone-notepad
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: fonts-patroneos
+Description: Notepad: plain text in tabs, for PatroneOS
+ Notepad edits plain text files, each in a tab across the top of the
+ window, with File, Edit and View menus, find and replace, go to line, word
+ wrap, zoom, a choice of font (PatroneOS Mono by default), printing, and a
+ light or dark look. Its status bar shows the cursor's line and column, how
+ many characters there are, the zoom, and the file's line endings and
+ encoding, which it keeps when it saves (UTF-8, UTF-16 and CP1252; LF, CRLF
+ and CR).
+ .
+ By default it keeps the open tabs and their unsaved changes when it closes
+ and brings them back the next time, without changing the files; Settings
+ turns that off, and Notepad then asks to save changes when it closes. The
+ command is notepad.

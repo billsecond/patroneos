@@ -1,3 +1,10 @@
+patrone-desktop (0.2.8) resolute; urgency=medium
+
+  * Recommends Notepad (patrone-notepad), Patrone's plain text editor;
+    patrone-default-apps 0.2.3 makes it the app for plain text.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 12:00:00 -0600
+
 patrone-desktop (0.2.7) resolute; urgency=medium
 
   * Patrone's apt pins keep its build of GNOME Software, which has the

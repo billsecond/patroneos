@@ -1,0 +1,125 @@
+# Notepad
+
+PatroneOS's plain text editor, packaged as `patrone-notepad`: a Rust and
+GTK 4 app (`org.patrone.Notepad`), and the default app for plain text
+(`patrone-default-apps`), with GNOME's Text Editor as the fallback.
+
+```
+notepad [--new-window] [FILE...]
+patrone-notepad [--new-window] [FILE...]
+```
+
+It's one process for every window: opening a file while Notepad's running
+opens it in a tab of the window last used (or a new window, if Settings
+says so, or with `--new-window`). A file that's already open shows its
+tab. A file that isn't there yet opens empty, and saving makes it.
+
+## The window
+
+- **Tabs** across the title bar, with **+** for a new one. A tab with
+  unsaved changes shows a dot where its close button is, and the close
+  button again when the pointer's over it. Drag a tab to move it along;
+  with only one tab, dragging it moves the window. A middle click closes
+  a tab. Closing the last tab closes the window.
+- **File, Edit and View** menus, with **Settings** (the gear) at the end of
+  their row:
+  - File: New tab (Ctrl+N or Ctrl+T), New window (Ctrl+Shift+N), Open
+    (Ctrl+O, several files at once), Save (Ctrl+S), Save as
+    (Ctrl+Shift+S), Save all (Ctrl+Alt+S), Print (Ctrl+P), Close tab
+    (Ctrl+W), Close window (Ctrl+Shift+W), Exit.
+  - Edit: Undo (Ctrl+Z), Redo (Ctrl+Y or Ctrl+Shift+Z), Cut, Copy, Paste,
+    Delete, Find (Ctrl+F), Find next (F3), Find previous (Shift+F3),
+    Replace (Ctrl+H), Go to line (Ctrl+G), Select all (Ctrl+A), Time and
+    date (F5), Font (opens Settings).
+  - View: Zoom in (Ctrl++), Zoom out (Ctrl+-), Reset zoom (Ctrl+0), also
+    Ctrl and the mouse wheel; Status bar; Word wrap.
+- **The text**, plain, in PatroneOS Mono at 11 points unless Settings
+  says otherwise.
+- **The status bar**: the cursor's line and column, the number of
+  characters (or how many of them are selected), the tab's zoom, and the
+  file's line endings and encoding. Clicking those two changes how the
+  file's saved.
+- **Find and replace** in a box over the top right of the text. It finds as
+  you type; Enter finds the next match and Shift+Enter the one before. The
+  arrow shows the Replace row (Replace, Replace all, which Undo takes back
+  in one step). The options button has Match case and Wrap around. Esc
+  closes it.
+- Ctrl+Tab and Ctrl+Shift+Tab (or Ctrl+Page Down and Up) go through the
+  tabs. Files dropped on the text open in tabs.
+
+## Settings
+
+Settings opens as a tab of its own. Every change applies at once, in every
+window, and is kept in `~/.config/patrone-notepad/settings.ini`.
+
+| Setting | Choices | Default |
+| --- | --- | --- |
+| Theme | Light, Dark, Same as the desktop | Same as the desktop |
+| Font | Any installed family, its styles, and a size from 8 to 72 points, with a preview | PatroneOS Mono, Regular, 11 |
+| Word wrap | On or off (also View › Word wrap) | On |
+| Where files open | In a new tab, In a new window | In a new tab |
+| Restore open tabs | On or off | On |
+
+The status bar and find options (Match case, Wrap around) are kept there
+too.
+
+## Restoring open tabs (auto-save)
+
+With **Restore open tabs** on, Notepad keeps every window's tabs, and
+their unsaved changes, as you work: a moment after each change, and when
+it closes. They come back the next time it starts, each tab as it was
+(still unsaved, with its dot), at its place in the text and its zoom. The
+files themselves change only when you save them.
+
+They're kept in `~/.local/state/patrone-notepad/session/`: `session.ini`
+lists the windows and tabs, and the text of a tab that has unsaved
+changes, or was never saved, is in a file of its own beside it. A tab with
+no unsaved changes is read from its file again.
+
+So with it on, closing the last window asks nothing. Closing a tab still
+asks about its unsaved changes, and so does closing one window while
+another stays open (nothing would keep its tabs). File › Exit keeps every
+window.
+
+With it off, Notepad starts with one new tab, and closing a window (or
+Exit) asks about each tab with unsaved changes in turn: Save, Don't save
+or Cancel. Turning it off deletes what was kept.
+
+## Files
+
+Notepad reads UTF-8 (with or without a byte order mark), UTF-16 (little or
+big endian, with its byte order mark) and, for anything else, CP1252, which
+every byte can be read as. It notes the line endings the file uses most
+(LF, CRLF or CR), shows plain lines, and saves with the same encoding and
+line endings, or the ones chosen in the status bar. New tabs are UTF-8 with
+LF. Saving in CP1252 text it can't hold asks first: save as UTF-8, save
+anyway (those characters become question marks), or cancel.
+
+Files are read and written through GIO, so files on network drives work
+too, and a file is replaced whole when it's saved (written beside it, then
+moved over it).
+
+## Printing
+
+File › Print prints the tab's text in Notepad's font at its own size (not
+the tab's zoom), wrapped to the page, with the file's name at the top of
+each page and "Page N of M" at the bottom. GTK's print dialog sets up the
+page and can print to a PDF file.
+
+## Building
+
+```
+cargo build --release
+cargo test
+```
+
+It needs GTK 4.22 (`libgtk-4-dev`) and builds with Rust 1.93, Ubuntu
+26.04's. The package: `./packaging/build.sh patrone-notepad -d` on the dev
+VM (`packaging/README.md`).
+
+`data/style.css` is the look; `data/over-theme.css` keeps the tabs readable
+under Patrone Settings' title bar styles, and `src/live_style.rs` (the same
+in Patrone's other apps) follows a new theme or title bar button style from
+Patrone Settings while Notepad runs. The icon, `data/org.patrone.Notepad.svg`,
+is Patrone's own: a page with a folded corner and lines of text on a
+Patrone-blue tile.

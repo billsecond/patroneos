@@ -1,10 +1,13 @@
 # Patrone's default apps, installed as /etc/xdg/mimeapps.list: Patrone File
 # Manager for folders, Patrone Unpack for archives, .deb packages and
-# Flatpak files, and GNOME's Video Player (Showtime, which patrone-desktop
-# recommends) for videos. The apps after each Patrone app are fallbacks for
-# when it isn't installed (Nautilus, Ubuntu's Files, extracts archives
-# itself; GNOME Software installs .deb packages). Each list's first
-# installed app is the default.
+# Flatpak files, Notepad for plain text (and empty files, which Ubuntu
+# gives its Text Editor too), and GNOME's Video Player (Showtime, which
+# patrone-desktop recommends) for videos. The apps after each Patrone app
+# are fallbacks for when it isn't installed (Nautilus, Ubuntu's Files,
+# extracts archives itself; GNOME Software installs .deb packages; GNOME's
+# Text Editor edits text). Each list's first installed app is the default.
+# Text files of other kinds (logs, scripts, settings files) are kinds of
+# plain text, so they open in Notepad too unless an app claims them.
 #
 # Videos: every type Video Player opens (its launcher's MimeType), so it
 # stays the default when another player is installed. Ubuntu's own list
@@ -23,6 +26,8 @@
 application/xhtml+xml=org.chromium.Chromium.desktop;org.mozilla.firefox.desktop;com.brave.Browser.desktop;com.google.Chrome.desktop;com.microsoft.Edge.desktop;com.vivaldi.Vivaldi.desktop;com.opera.Opera.desktop;io.gitlab.librewolf-community.desktop;app.zen_browser.zen.desktop;org.gnome.Epiphany.desktop;chromium_chromium.desktop;chromium.desktop;firefox_firefox.desktop;firefox.desktop;brave_brave.desktop;brave-browser.desktop;google-chrome.desktop;microsoft-edge.desktop;vivaldi-stable.desktop;opera.desktop;librewolf.desktop;org.patrone.BrowserChooser.desktop;
 text/html=org.chromium.Chromium.desktop;org.mozilla.firefox.desktop;com.brave.Browser.desktop;com.google.Chrome.desktop;com.microsoft.Edge.desktop;com.vivaldi.Vivaldi.desktop;com.opera.Opera.desktop;io.gitlab.librewolf-community.desktop;app.zen_browser.zen.desktop;org.gnome.Epiphany.desktop;chromium_chromium.desktop;chromium.desktop;firefox_firefox.desktop;firefox.desktop;brave_brave.desktop;brave-browser.desktop;google-chrome.desktop;microsoft-edge.desktop;vivaldi-stable.desktop;opera.desktop;librewolf.desktop;org.patrone.BrowserChooser.desktop;
 inode/directory=org.patrone.FileManager.desktop;org.gnome.Nautilus.desktop;
+text/plain=org.patrone.Notepad.desktop;org.gnome.TextEditor.desktop;
+application/x-zerosize=org.patrone.Notepad.desktop;org.gnome.TextEditor.desktop;
 x-scheme-handler/http=org.chromium.Chromium.desktop;org.mozilla.firefox.desktop;com.brave.Browser.desktop;com.google.Chrome.desktop;com.microsoft.Edge.desktop;com.vivaldi.Vivaldi.desktop;com.opera.Opera.desktop;io.gitlab.librewolf-community.desktop;app.zen_browser.zen.desktop;org.gnome.Epiphany.desktop;chromium_chromium.desktop;chromium.desktop;firefox_firefox.desktop;firefox.desktop;brave_brave.desktop;brave-browser.desktop;google-chrome.desktop;microsoft-edge.desktop;vivaldi-stable.desktop;opera.desktop;librewolf.desktop;org.patrone.BrowserChooser.desktop;
 x-scheme-handler/https=org.chromium.Chromium.desktop;org.mozilla.firefox.desktop;com.brave.Browser.desktop;com.google.Chrome.desktop;com.microsoft.Edge.desktop;com.vivaldi.Vivaldi.desktop;com.opera.Opera.desktop;io.gitlab.librewolf-community.desktop;app.zen_browser.zen.desktop;org.gnome.Epiphany.desktop;chromium_chromium.desktop;chromium.desktop;firefox_firefox.desktop;firefox.desktop;brave_brave.desktop;brave-browser.desktop;google-chrome.desktop;microsoft-edge.desktop;vivaldi-stable.desktop;opera.desktop;librewolf.desktop;org.patrone.BrowserChooser.desktop;
 application/zip=org.patrone.Unpack.desktop;org.gnome.Nautilus.desktop;

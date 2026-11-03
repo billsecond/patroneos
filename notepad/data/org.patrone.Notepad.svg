@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <!-- Notepad: a white page with a folded corner, lines of text and a text
+       cursor, on a Patrone-blue tile. Bold shapes only, so it stays clear
+       at 16 pixels. -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4da0fc"/>
+      <stop offset="1" stop-color="#1d5cc4"/>
+    </linearGradient>
+  </defs>
+  <rect x="10" y="10" width="108" height="108" rx="26" fill="url(#tile)"/>
+  <rect x="10.5" y="10.5" width="107" height="107" rx="25.5" fill="none" stroke="#ffffff" stroke-opacity="0.3"/>
+  <!-- The page, and its folded corner -->
+  <path d="M36 30 a6 6 0 0 1 6 -6 H78 L94 40 V98 a6 6 0 0 1 -6 6 H42 a6 6 0 0 1 -6 -6 Z" fill="#ffffff"/>
+  <path d="M78 24 V36 a4 4 0 0 0 4 4 H94 Z" fill="#bcd8fb"/>
+  <!-- Lines of text, the last one being typed -->
+  <g stroke="#1d5cc4" stroke-width="6" stroke-linecap="round">
+    <path d="M47 52 H70"/>
+    <path d="M47 64 H83"/>
+    <path d="M47 76 H83"/>
+    <path d="M47 88 H64"/>
+  </g>
+  <path d="M73 82 V94" stroke="#288bfa" stroke-width="4" stroke-linecap="round"/>
+</svg>

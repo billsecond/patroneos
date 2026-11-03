@@ -1,0 +1,300 @@
+/* Notepad's look: a tinted title bar of tabs, the selected tab joined to
+   the menu row under it, a plain white (or dark) page for the text, and a
+   quiet status bar. The palette is set once below and swapped for dark. */
+
+window.notepad, window.go-to-dialog, tooltip, popover {
+  --mica: #eef2f8;
+  --layer: #f8fafd;
+  --surface: #ffffff;
+  --divider: #e5e7eb;
+  --text: #1b1b1b;
+  --text-secondary: #5f6368;
+  --accent: #288bfa;
+  --on-accent: #ffffff;
+  --selection: rgba(40, 139, 250, 0.30);
+  --hover: rgba(0, 0, 0, 0.05);
+  --pressed: rgba(0, 0, 0, 0.08);
+  --field: #ffffff;
+  --field-border: #d9dce0;
+  --menu: #fbfbfb;
+  --menu-border: rgba(0, 0, 0, 0.10);
+  --shadow: rgba(0, 0, 0, 0.16);
+  --danger: #c42b1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  window.notepad, window.go-to-dialog, tooltip, popover {
+    --mica: #1d1f23;
+    --layer: #26282c;
+    --surface: #1f2023;
+    --divider: #34363a;
+    --text: #f2f2f2;
+    --text-secondary: #c2c5ca;
+    --accent: #4da0fc;
+    --on-accent: #0b1f33;
+    --selection: rgba(77, 160, 252, 0.40);
+    --hover: rgba(255, 255, 255, 0.07);
+    --pressed: rgba(255, 255, 255, 0.04);
+    --field: #2b2c2f;
+    --field-border: #3c3e42;
+    --menu: #2b2c2f;
+    --menu-border: rgba(255, 255, 255, 0.08);
+    --shadow: rgba(0, 0, 0, 0.45);
+    --danger: #ff99a4;
+  }
+}
+
+window.notepad {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+/* The same corners as GNOME's apps, and square where the window meets the
+   screen's edges, which GTK's own rules can't do from below this one. */
+window.notepad.csd:not(.maximized):not(.fullscreen):not(.tiled):not(.tiled-top):not(.tiled-right):not(.tiled-bottom):not(.tiled-left) {
+  border-radius: 15px;
+}
+
+/* --- The title bar of tabs ---------------------------------------------- */
+
+/* A headerbar node, so the title bar style in the account's gtk.css
+   (Patrone Settings) paints it as it paints every app's; this is the look
+   without one. */
+headerbar.tab-bar,
+headerbar.tab-bar:backdrop {
+  background-color: var(--mica);
+  background-image: none;
+  color: var(--text-secondary);
+  box-shadow: none;
+  border: none;
+  min-height: 40px;
+  padding: 6px 4px 0 10px;
+}
+
+.app-icon {
+  margin: 0 10px 6px 4px;
+}
+
+.tab {
+  min-height: 32px;
+  min-width: 110px;
+  padding: 0 4px 0 12px;
+  border-radius: 8px 8px 0 0;
+  transition: background-color 120ms ease-out;
+}
+
+.tab:hover {
+  background-color: var(--hover);
+}
+
+.tab.active {
+  background-color: var(--layer);
+  color: var(--text);
+}
+
+button.tab-close,
+button.new-tab,
+button.settings-button,
+button.find-button,
+menubutton.find-button > button,
+menubutton.status-menu > button {
+  background: none;
+  border: none;
+  box-shadow: none;
+  outline: none;
+}
+
+button.tab-close {
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  border-radius: 4px;
+}
+
+button.tab-close:hover,
+button.new-tab:hover,
+button.settings-button:hover,
+button.find-button:hover,
+menubutton.find-button > button:hover,
+menubutton.status-menu > button:hover {
+  background-color: var(--hover);
+}
+
+button.tab-close:active,
+button.new-tab:active,
+button.settings-button:active,
+button.find-button:active {
+  background-color: var(--pressed);
+}
+
+/* Unsaved changes: a dot where the close button is */
+.modified-dot {
+  min-width: 8px;
+  min-height: 8px;
+  border-radius: 4px;
+  background-color: currentColor;
+}
+
+button.new-tab {
+  min-width: 32px;
+  min-height: 28px;
+  margin: 0 6px 6px 4px;
+  border-radius: 6px;
+}
+
+/* --- The menus and Settings ----------------------------------------------- */
+
+.menu-row {
+  background-color: var(--layer);
+  border-bottom: 1px solid var(--divider);
+  padding: 2px 8px 2px 4px;
+}
+
+.menu-row popovermenubar > item {
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+.menu-row popovermenubar > item:hover,
+.menu-row popovermenubar > item:selected {
+  background-color: var(--hover);
+}
+
+button.settings-button {
+  min-width: 32px;
+  min-height: 30px;
+  padding: 0;
+  border-radius: 6px;
+  color: var(--text);
+}
+
+/* --- The text ------------------------------------------------------------- */
+
+textview.editor,
+textview.editor > text {
+  background-color: var(--surface);
+  color: var(--text);
+}
+
+textview.editor > text > selection {
+  background-color: var(--selection);
+  color: var(--text);
+}
+
+/* --- The status bar ------------------------------------------------------- */
+
+.status-bar {
+  background-color: var(--layer);
+  border-top: 1px solid var(--divider);
+  color: var(--text-secondary);
+  min-height: 28px;
+  padding: 0 6px;
+  font-size: 9pt;
+}
+
+.status-bar > .status-item {
+  padding: 0 14px;
+  border-left: 1px solid var(--divider);
+}
+
+.status-bar > .status-item:first-child {
+  border-left: none;
+  padding-left: 8px;
+}
+
+.status-bar > menubutton.status-item {
+  padding: 0 4px;
+}
+
+menubutton.status-menu > button {
+  min-height: 22px;
+  padding: 0 10px;
+  border-radius: 4px;
+  font-weight: normal;
+  color: inherit;
+}
+
+/* --- Find and replace ----------------------------------------------------- */
+
+.find-panel {
+  background-color: var(--menu);
+  border: 1px solid var(--menu-border);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px var(--shadow);
+  padding: 6px;
+  margin: 8px 24px 0 0;
+  color: var(--text);
+}
+
+button.find-button,
+menubutton.find-button > button {
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0;
+  border-radius: 4px;
+  color: var(--text);
+}
+
+.find-panel entry.error {
+  color: var(--danger);
+}
+
+.replace-row {
+  margin-left: 34px;
+}
+
+.find-options {
+  padding: 6px;
+}
+
+/* --- Settings ------------------------------------------------------------- */
+
+.settings-scroller {
+  background-color: var(--mica);
+}
+
+.settings-page {
+  padding: 24px 40px 40px;
+}
+
+.settings-title {
+  font-size: 20pt;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.settings-heading {
+  font-weight: 600;
+  margin: 18px 0 6px;
+}
+
+.card {
+  background-color: var(--layer);
+  border: 1px solid var(--divider);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 2px;
+}
+
+.card-subtitle {
+  font-size: 0.92em;
+  color: var(--text-secondary);
+}
+
+.np-font-preview {
+  padding: 10px 12px;
+  border-radius: 6px;
+  background-color: var(--surface);
+  border: 1px solid var(--divider);
+}
+
+/* --- Go to line ------------------------------------------------------------ */
+
+.go-to-content {
+  padding: 18px 20px 20px;
+}
+
+.go-to-problem {
+  color: var(--danger);
+}

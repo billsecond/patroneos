@@ -1,0 +1,27 @@
+patrone-notepad (0.1.0) resolute; urgency=medium
+
+  * First package: Notepad, a plain text editor with tabs across the title
+    bar and a + button for a new one; File, Edit and View menus with
+    Settings at the end of their row; and a status bar with the cursor's
+    line and column, the number of characters (and how many are selected),
+    the zoom, the line endings and the encoding, the last two of which can
+    be changed from there.
+  * New tab, New window, Open, Save, Save as, Save all, Print, Close tab,
+    Close window and Exit; Undo, Redo, Cut, Copy, Paste, Delete, Find, Find
+    next and previous, Replace, Go to line, Select all, the time and date,
+    and Font; Zoom, the status bar and word wrap.
+  * Find and replace in a box over the text, finding as you type, with
+    Match case and Wrap around.
+  * Reads UTF-8 (with or without a byte order mark), UTF-16 and CP1252
+    text, with LF, CRLF or CR line endings, and saves it the same way.
+  * Settings: the app's theme (light, dark or the desktop's), the font
+    (PatroneOS Mono, 11 points, by default), word wrap, whether files from
+    other apps open in a new tab or a new window, and whether to restore
+    open tabs: on, Notepad keeps the open tabs and their unsaved changes as
+    you work (in ~/.local/state/patrone-notepad), without changing the
+    files, and brings them back when it starts; off, it starts with a new
+    tab and asks to save changes when it closes.
+  * The notepad command, its launcher entry and Patrone's own icon. Files
+    can be dropped on the window to open them.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 12:00:00 -0600

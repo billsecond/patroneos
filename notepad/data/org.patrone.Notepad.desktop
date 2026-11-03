@@ -1,0 +1,17 @@
+[Desktop Entry]
+Type=Application
+Name=Notepad
+GenericName=Text Editor
+Comment=Write and edit plain text, in tabs
+Keywords=text;editor;plain;txt;notes;notepad;write;edit;
+Exec=patrone-notepad %F
+Icon=org.patrone.Notepad
+Terminal=false
+StartupNotify=true
+Categories=GTK;Utility;TextEditor;
+MimeType=text/plain;application/x-zerosize;
+Actions=new-window;
+
+[Desktop Action new-window]
+Name=New window
+Exec=patrone-notepad --new-window
