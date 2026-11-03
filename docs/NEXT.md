@@ -122,6 +122,35 @@ Done:
 
 Waiting on the user:
 
+- **Notepad** (the user, 2026-11-03: "build a notepad application ... and
+  please build it in RUST", "allowing me to turn off the auto-save option";
+  `notepad/README.md`, package `patrone-notepad` 0.1.0): a Rust and GTK 4
+  text editor with tabs in the title bar, File, Edit and View menus,
+  Settings as a tab, find and replace, go to line, zoom, printing, a font
+  of your choice (PatroneOS Mono by default) and a status bar. By default
+  it keeps open tabs and their unsaved changes between sessions
+  (Settings → Restore open tabs turns that off). `patrone-default-apps`
+  0.2.3 makes it the app for plain text, with GNOME's Text Editor as the
+  fallback, and `patrone-desktop` 0.2.8 recommends it; the command is
+  `notepad`. On PatroneDev, `patrone-notepad` 0.1.0 and
+  `patrone-default-apps` 0.2.3 are installed from the branch build (not
+  `patrone-desktop` 0.2.8, which only adds the recommendation). Checked
+  with the installed package in a throwaway GNOME Shell (its own state
+  folder too): found in the Start menu, opened, tabs (new, switching,
+  dragging, closing one with unsaved changes), Open, Save, Save as, files
+  opened through `gio open` going to the running window, find and
+  replace, go to line, zoom, dark theme, printing to PDF (3 pages, header
+  and footer), and Restore open
+  tabs both ways (on: tabs and unsaved text came back after closing; off:
+  closing asked to save, and it started with an empty tab), and its look
+  in dark with the user's own theme (Studio, Wide buttons). In the user's
+  own desktop it was only launched over SSH (it ran, and its session file
+  had the tab), not looked at: the VM's screen shows the login screen, so
+  `vmshot.ps1` can't see that desktop. Not tried: dropping files on the
+  window, a real printer, and Patrone Settings' other themes and title bar
+  buttons. Other installs, once it's published:
+  `sudo apt update && sudo apt install patrone-notepad`.
+
 - **Patrone Software's Featured tab** (the user, 2026-10-31: "please feature
   only for now, the MailCraft, the Artcraft Launcher and the Artcraft PDF
   and the Portal for TEams, Wordcraft, Gridcraft. Add the ScreeGrabCraft
