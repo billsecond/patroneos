@@ -184,6 +184,26 @@ Waiting on the user:
   with nothing kept while it was off; and all 29 tests, the Markdown round
   trip on the repo's 35 files included.
 
+  **0.3.1: new tabs are Markdown too** (the user: "why doesn't the
+  formated markdown work too"): a tab was Markdown only when its file was
+  named `.md`, so a new tab never was. Each tab now has a Markdown/Plain
+  text mode (status bar, View, command search); new tabs start in
+  Markdown while the setting's on, files by their names, and Save as
+  suggests `.md` or `.txt` to match. Installed on PatroneDev. Checked in
+  the throwaway shell by typing in a new tab (formatted as typed), and in
+  the user's own desktop with a separate copy on its Wayland display and
+  a private D-Bus session: a new tab started in Markdown, and text put in
+  through the app's own actions showed as Heading 1 with its `# ` hidden
+  (read through AT-SPI; no screenshot tool reaches that desktop). The
+  user was using the desktop then (an enhanced session, which a check of
+  TCP 3389 doesn't see), so the test windows showed on their screen.
+  **Lesson:** a private D-Bus session started with the user's
+  `XDG_RUNTIME_DIR` runs its own accessibility bus launcher, which removed
+  the user's `/run/user/1000/at-spi/bus` socket when it ended; apps opened
+  after that can't reach the accessibility bus until
+  `at-spi-dbus-bus.service` is restarted or the user signs in again. Give
+  such a session its own `XDG_RUNTIME_DIR`.
+
   **A Windows build** (the user: "Then install it here on this windows
   environment as well as discribe how to install it on another
   environemtn"): `notepad/windows/build.ps1` makes a zip whose
