@@ -87,11 +87,15 @@ impl App {
             settings.set_gtk_theme_name(Some("Default"));
             // GTK 4.22's Default theme stays light when dark is preferred,
             // though the preference reaches GTK (and the style sheet below);
-            // its dark variant has to be asked for.
+            // its dark variant has to be asked for. Only when it changes:
+            // newer GTK (4.24, on Windows) turns setting it into a change of
+            // the color scheme, which would call this again, endlessly.
             #[allow(deprecated)]
             fn follow(settings: &gtk::Settings) {
                 let dark = settings.gtk_interface_color_scheme() == gtk::InterfaceColorScheme::Dark;
-                settings.set_gtk_application_prefer_dark_theme(dark);
+                if settings.is_gtk_application_prefer_dark_theme() != dark {
+                    settings.set_gtk_application_prefer_dark_theme(dark);
+                }
             }
             follow(&settings);
             settings.connect_gtk_interface_color_scheme_notify(follow);

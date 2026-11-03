@@ -1,3 +1,11 @@
+patrone-notepad (0.3.2) resolute; urgency=medium
+
+  * The dark theme is only asked for when it changes. Newer GTK (4.24, in
+    the Windows build) turns asking for it into a change of the color
+    scheme, which asked again, endlessly: Notepad never opened a window.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 20:00:00 -0600
+
 patrone-notepad (0.3.1) resolute; urgency=medium
 
   * New tabs are Markdown, formatted as you type, while Settings' Markdown
