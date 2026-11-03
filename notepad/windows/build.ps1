@@ -7,11 +7,10 @@ in the zip).
 
   powershell -ExecutionPolicy Bypass -File notepad\windows\build.ps1 [-Msys2 FOLDER] [-SkipPackages]
 
-It needs Rust from rustup, and MSYS2 (https://www.msys2.org) in -Msys2
-(by default %LOCALAPPDATA%\msys64). Unless -SkipPackages, it first installs
-MSYS2's GTK 4, compiler and icon packages and Rust's
-stable-x86_64-pc-windows-gnu toolchain. Nothing is installed for the
-system: MSYS2's packages stay in its folder, Rust's in %USERPROFILE%\.rustup.
+It needs MSYS2 (https://www.msys2.org) in -Msys2 (by default
+%LOCALAPPDATA%\msys64). Unless -SkipPackages, it first installs MSYS2's
+UCRT64 GTK 4, Rust, compiler and icon packages. Nothing is installed for the
+system: MSYS2's packages stay in its folder.
 #>
 param(
     [string]$Msys2 = "$env:LOCALAPPDATA\msys64",
@@ -22,39 +21,39 @@ $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path "$PSScriptRoot\..\..").Path
 $notepad = Join-Path $root 'notepad'
 $version = (Select-String -Path "$notepad\Cargo.toml" -Pattern '^version = "(.+)"').Matches[0].Groups[1].Value
-$mingw = Join-Path $Msys2 'mingw64'
+# MSYS2's UCRT64 environment: its MINGW64 one no longer has GTK 4
+$mingw = Join-Path $Msys2 'ucrt64'
 $bash = Join-Path $Msys2 'usr\bin\bash.exe'
 if (-not (Test-Path $bash)) {
     throw "MSYS2 isn't in $Msys2 (notepad\README.md, `"Windows`", says how to set it up)"
 }
 
-# A command in MSYS2's MINGW64 environment, in this folder
+# A command in MSYS2's UCRT64 environment, in this folder
 function Invoke-Msys2([string]$Command) {
-    $env:MSYSTEM = 'MINGW64'
+    $env:MSYSTEM = 'UCRT64'
     $env:CHERE_INVOKING = '1'
-    # Windows' PATH too, for rustup's rustc and cargo
+    # Windows' PATH too, after MSYS2's own (so its rustc comes first)
     $env:MSYS2_PATH_TYPE = 'inherit'
     & $bash -lc $Command
     if ($LASTEXITCODE -ne 0) { throw "MSYS2: '$Command' failed" }
 }
 
 if (-not $SkipPackages) {
-    Invoke-Msys2 ('pacman -S --needed --noconfirm mingw-w64-x86_64-gtk4 mingw-w64-x86_64-gcc ' +
-        'mingw-w64-x86_64-pkgconf mingw-w64-x86_64-librsvg mingw-w64-x86_64-adwaita-icon-theme ' +
-        'mingw-w64-x86_64-ntldd')
-    rustup toolchain install stable-x86_64-pc-windows-gnu --profile minimal
-    if ($LASTEXITCODE -ne 0) { throw 'rustup failed' }
+    Invoke-Msys2 ('pacman -S --needed --noconfirm mingw-w64-ucrt-x86_64-gtk4 mingw-w64-ucrt-x86_64-rust ' +
+        'mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-pkgconf mingw-w64-ucrt-x86_64-librsvg ' +
+        'mingw-w64-ucrt-x86_64-adwaita-icon-theme mingw-w64-ucrt-x86_64-ntldd')
 }
 
 # --- Build ---------------------------------------------------------------------
-# MSYS2's MINGW64 libraries are built against msvcrt, like Rust's
-# x86_64-pc-windows-gnu target, which links them with MSYS2's own gcc
+# With MSYS2's own Rust and gcc, so the program and GTK share one C runtime
+# (UCRT). Its cargo, not rustup's, comes first on the PATH.
+$cargo = Join-Path $mingw 'bin\cargo.exe'
 $env:PATH = "$mingw\bin;$env:PATH"
 $env:PKG_CONFIG_PATH = "$mingw\lib\pkgconfig"
 $env:CARGO_TARGET_DIR = Join-Path $notepad 'target\windows'
 Push-Location $notepad
 try {
-    cargo +stable-x86_64-pc-windows-gnu build --release --locked
+    & $cargo build --release --locked
     if ($LASTEXITCODE -ne 0) { throw 'cargo build failed' }
 } finally {
     Pop-Location
@@ -83,7 +82,7 @@ $cache = Get-ChildItem -Recurse "$stage\lib\gdk-pixbuf-2.0" -Filter loaders.cach
 if ($cache) {
     $prefix = [regex]::Escape(($mingw -replace '\\', '/') + '/')
     $text = (Get-Content -Raw $cache.FullName) -replace "(?i)`"$prefix", '"'
-    $text = $text -replace '(?i)"[a-z]:[\\/][^"]*?[\\/]mingw64[\\/]', '"'
+    $text = $text -replace '(?i)"[a-z]:[\\/][^"]*?[\\/]ucrt64[\\/]', '"'
     Set-Content -NoNewline -Encoding utf8 $cache.FullName $text
 }
 
@@ -168,7 +167,7 @@ Remove-Item -Recurse -Force $fonts
 Copy-Item "$root\LICENSE" "$stage\licenses\patrone-notepad-LICENSE.txt"
 Push-Location $notepad
 try {
-    cargo +stable-x86_64-pc-windows-gnu vendor --locked --quiet "$out\vendor" | Out-Null
+    & $cargo vendor --locked --quiet "$out\vendor" | Out-Null
 } finally {
     Pop-Location
 }
@@ -179,7 +178,7 @@ foreach ($dll in @($copied.Keys) + @("$mingw\bin\gdbus.exe")) {
     $owner = & $bash -lc "pacman -Qqo '$($dll -replace '\\', '/')' 2>/dev/null"
     if ($owner) { $packages[$owner.Trim()] = $true }
 }
-foreach ($package in 'mingw-w64-x86_64-gtk4', 'mingw-w64-x86_64-gdk-pixbuf2', 'mingw-w64-x86_64-librsvg', 'mingw-w64-x86_64-adwaita-icon-theme', 'mingw-w64-x86_64-glib2') {
+foreach ($package in 'mingw-w64-ucrt-x86_64-gtk4', 'mingw-w64-ucrt-x86_64-gdk-pixbuf2', 'mingw-w64-ucrt-x86_64-librsvg', 'mingw-w64-ucrt-x86_64-adwaita-icon-theme', 'mingw-w64-ucrt-x86_64-glib2') {
     $packages[$package] = $true
 }
 $sources = @('The GTK runtime in this folder (the DLLs in bin, lib\gdk-pixbuf-2.0, share\icons and',
@@ -190,8 +189,8 @@ foreach ($package in ($packages.Keys | Sort-Object)) {
     $versionLine = ($info | Select-String '^Version\s*:\s*(.+)$').Matches
     $licenceLine = ($info | Select-String '^Licenses\s*:\s*(.+)$').Matches
     $sources += "$package $(if ($versionLine) { $versionLine[0].Groups[1].Value }): $(if ($licenceLine) { $licenceLine[0].Groups[1].Value })"
-    $sources += "    https://packages.msys2.org/package/$($package)?repo=mingw64"
-    $name = $package -replace '^mingw-w64-x86_64-', ''
+    $sources += "    https://packages.msys2.org/package/$($package)?repo=ucrt64"
+    $name = $package -replace '^mingw-w64-ucrt-x86_64-', ''
     $licences = "$mingw\share\licenses\$name"
     if (Test-Path $licences) { Copy-Item -Recurse $licences "$stage\licenses\$name" }
 }

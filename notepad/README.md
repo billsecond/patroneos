@@ -241,21 +241,22 @@ through Pango's `add_font_file`). Settings and kept tabs are in
 
 To build it, on Windows:
 
-1. Rust from rustup (https://rustup.rs).
-2. MSYS2 (https://www.msys2.org), in `%LOCALAPPDATA%\msys64` for one
-   account: unpack `msys2-base-x86_64-DATE.tar.xz` from
-   https://github.com/msys2/msys2-installer/releases there (check it
-   against its `.sha256`), then bring it up to date, twice:
-   `%LOCALAPPDATA%\msys64\usr\bin\bash.exe -lc "pacman -Syuu --noconfirm"`.
-   MSYS2's own installer works too (pass its folder as `-Msys2`).
-3. From this checkout:
-   `powershell -ExecutionPolicy Bypass -File notepad\windows\build.ps1`.
-   The first run installs MSYS2's GTK 4, gcc, pkgconf, librsvg, Adwaita
-   icons and ntldd, and Rust's `stable-x86_64-pc-windows-gnu` toolchain
-   (`-SkipPackages` skips that).
+1. MSYS2 (https://www.msys2.org): `winget install --id MSYS2.MSYS2 -e`
+   puts it in `C:\msys64`. Or, for one account, unpack
+   `msys2-base-x86_64-DATE.tar.xz` from
+   https://github.com/msys2/msys2-installer/releases in
+   `%LOCALAPPDATA%\msys64` (check it against its `.sha256`). Then bring it
+   up to date, twice:
+   `C:\msys64\usr\bin\bash.exe -lc "pacman -Syuu --noconfirm"`.
+2. From this checkout:
+   `powershell -ExecutionPolicy Bypass -File notepad\windows\build.ps1 -Msys2 C:\msys64`
+   (leave out `-Msys2` for `%LOCALAPPDATA%\msys64`). The first run
+   installs MSYS2's UCRT64 GTK 4, Rust, gcc, pkgconf, librsvg, Adwaita
+   icons and ntldd (`-SkipPackages` skips that).
 
-It builds with Rust's `x86_64-pc-windows-gnu` target against MSYS2's
-MINGW64 libraries, then puts the program, every DLL it needs (found with
+It builds with MSYS2's own Rust and gcc against its UCRT64 libraries
+(its MINGW64 environment no longer has GTK 4), so the program and GTK
+share one C runtime. Then it puts the program, every DLL it needs (found with
 `ntldd`), GLib's `gdbus.exe` (which keeps it one process), gdk-pixbuf's
 image loaders, GTK's schemas, the Adwaita and hicolor icons, Notepad's
 icon (also as an `.ico`, drawn from the SVG at seven sizes), the PatroneOS

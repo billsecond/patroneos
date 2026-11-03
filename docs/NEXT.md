@@ -209,11 +209,15 @@ Waiting on the user:
   environemtn"): `notepad/windows/build.ps1` makes a zip whose
   `install.ps1` installs Patrone Notepad for one account (no
   administrator, a Start menu entry, no file associations). Not built or
-  run yet: running MSYS2 on the user's PC (unpacked in
-  `%LOCALAPPDATA%\msys64`, its checksum checked) was refused by Claude
-  Code's permission check, so it waits for the user to allow that or to
-  run `build.ps1` themselves. The scripts only parse so far, and whether
-  Pango loads the bundled fonts on Windows (`add_font_file`) is untried.
+  run yet: running MSYS2 on the user's PC was refused by Claude Code's
+  permission check, and the copy a session unpacked in
+  `%LOCALAPPDATA%\msys64` was only in its sandbox's view of the disk, not
+  on the user's. The user installed MSYS2 in `C:\msys64` with winget
+  (2026-11-03) and runs `build.ps1 -Msys2 C:\msys64` themselves. Their
+  first run stopped: MSYS2's MINGW64 environment no longer has GTK 4, so
+  the build moved to UCRT64, with MSYS2's own Rust in place of rustup's
+  `windows-gnu` toolchain. Whether Pango loads the bundled fonts on
+  Windows (`add_font_file`) is untried.
 
 - **Patrone Software's Featured tab** (the user, 2026-10-31: "please feature
   only for now, the MailCraft, the Artcraft Launcher and the Artcraft PDF
