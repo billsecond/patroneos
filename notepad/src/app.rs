@@ -316,9 +316,7 @@ impl App {
                 }
             }
         } else if first && !self.windows.borrow().is_empty() && !new_window {
-            for window in self.windows() {
-                window.gtk.present();
-            }
+            // The last session's windows are showing
         } else {
             let window = Window::new(None);
             window.new_tab();
@@ -338,6 +336,7 @@ impl App {
                 continue;
             }
             window.select_index(state.current);
+            window.gtk.present();
         }
     }
 
@@ -404,6 +403,10 @@ impl App {
     /// it's kept; others (and every window when it isn't) ask about unsaved
     /// changes, since nothing else would keep them.
     pub fn close_window(self: &Rc<Self>, window: &Rc<Window>) {
+        // Asked once, however often the close button's pressed meanwhile
+        if window.closing.replace(true) {
+            return;
+        }
         let app = self.clone();
         let window = window.clone();
         glib::spawn_future_local(async move {
@@ -411,6 +414,7 @@ impl App {
             if last && app.settings.borrow().restore_session {
                 app.save_session();
             } else if !window.confirm_close_all().await {
+                window.closing.set(false);
                 return;
             }
             window.gtk.destroy();

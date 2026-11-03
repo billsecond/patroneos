@@ -156,6 +156,8 @@ pub struct Window {
     /// The document tab shown before Settings, to go back to.
     last_doc: RefCell<Weak<Tab>>,
     drag: Cell<DragMode>,
+    /// Asking about unsaved changes before the window closes.
+    pub closing: Cell<bool>,
     me: Weak<Window>,
 }
 
@@ -412,6 +414,7 @@ impl Window {
             selected: RefCell::default(),
             last_doc: RefCell::default(),
             drag: Cell::new(DragMode::Done),
+            closing: Cell::new(false),
             me: me.clone(),
         });
         window.find.attach(&window);
