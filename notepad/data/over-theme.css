@@ -1,0 +1,14 @@
+/* Loaded just above the account's own style sheet, where Patrone Settings
+   puts the title bar styles. Those restyle everything in a header bar
+   (bold labels, light buttons); here the tabs keep theirs: the selected tab
+   belongs to the window below the title bar, not to the title bar, and tab
+   names stay in their usual weight. */
+.tab label {
+  font-weight: normal;
+}
+
+.tab.active label,
+.tab.active image,
+.tab.active button.tab-close {
+  color: var(--text);
+}

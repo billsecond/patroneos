@@ -1,0 +1,34 @@
+#!/usr/bin/make -f
+# The source tree arrives with its crates vendored (packaging/build.sh), so
+# cargo never touches the network.
+
+export CARGO_HOME = $(CURDIR)/debian/cargo-home
+pkg = debian/patrone-notepad
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	cargo build --release --frozen
+
+override_dh_auto_test:
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	cargo test --release --frozen
+endif
+
+override_dh_auto_install:
+	install -Dm755 target/release/patrone-notepad $(pkg)/usr/bin/patrone-notepad
+	# The command people type (no Ubuntu package has one by that name)
+	ln -s patrone-notepad $(pkg)/usr/bin/notepad
+	install -Dm644 data/org.patrone.Notepad.desktop \
+	    $(pkg)/usr/share/applications/org.patrone.Notepad.desktop
+	install -Dm644 data/org.patrone.Notepad.svg \
+	    $(pkg)/usr/share/icons/hicolor/scalable/apps/org.patrone.Notepad.svg
+
+override_dh_auto_clean:
+	rm -rf target debian/cargo-home
+
+# dh_clean deletes *.orig files, but every vendored crate has a
+# Cargo.toml.orig that cargo checksums.
+override_dh_clean:
+	dh_clean -XCargo.toml.orig

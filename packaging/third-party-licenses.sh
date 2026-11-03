@@ -76,6 +76,10 @@ echo "The Rust standard library"
 echo "================================================================"
 echo
 sysroot=$(rustc --print sysroot 2>/dev/null || true)
+# Run in MSYS2 on Windows (notepad/windows/build.ps1), rustc gives a Windows path
+if [[ -n $sysroot ]] && command -v cygpath > /dev/null; then
+    sysroot=$(cygpath -u "$sysroot")
+fi
 std_html=$sysroot/share/doc/rust/COPYRIGHT-library.html
 std_debian=$(ls /usr/share/doc/libstd-rust-*/copyright 2>/dev/null | head -1 || true)
 if [[ -n $sysroot && -f $std_html ]]; then

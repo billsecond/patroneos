@@ -1,0 +1,89 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: patrone-notepad
+Source: https://github.com/billsecond/patroneos
+Comment:
+ Notepad links dynamically to GTK 4, GLib, Pango, Cairo, HarfBuzz,
+ graphene and the libraries they use, from Ubuntu's own packages
+ (libgtk-4-1, libglib2.0-0t64, libpango-1.0-0, libcairo2 and the rest),
+ under the LGPL-2.1+ and other free licences. It ships none of them: each
+ package's licence and copyright notices are in its own
+ /usr/share/doc/PACKAGE/copyright, and its source is in Ubuntu's archive
+ (apt-get source PACKAGE).
+ .
+ It uses PatroneOS's fonts from fonts-patroneos, which it depends on and
+ doesn't ship: they're under the SIL Open Font License 1.1
+ (/usr/share/doc/fonts-patroneos/OFL.txt).
+ .
+ Notepad's About window (Settings, About) shows these licences, and the
+ full texts in third-party-licenses.txt.gz (below).
+
+Files: *
+Copyright: 2026 William Daugherty
+License: GPL-3+
+
+Files: vendor/*
+Copyright: The authors of each crate
+License: MIT or Apache-2.0
+Comment:
+ The 69 Rust crates in vendor/, which packaging/build.sh adds, are compiled
+ into the program, with Rust's standard library. 66 are MIT, or MIT or
+ Apache-2.0 at the user's choice; the others are the Unlicense or MIT
+ (memchr), Apache-2.0 with the LLVM exception (target-lexicon), and MIT or
+ Apache-2.0 with Unicode-3.0 for the Unicode data (unicode-ident). All of
+ them allow being part of a GPL-3+ program. The licence texts are below;
+ each crate's own licence files, with its copyright notices, and the
+ standard library's, are in
+ /usr/share/doc/patrone-notepad/third-party-licenses.txt.gz.
+
+License: GPL-3+
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 3 can be found in "/usr/share/common-licenses/GPL-3".
+
+License: MIT
+ Permission is hereby granted, free of charge, to any person obtaining a
+ copy of this software and associated documentation files (the
+ "Software"), to deal in the Software without restriction, including
+ without limitation the rights to use, copy, modify, merge, publish,
+ distribute, sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so, subject to
+ the following conditions:
+ .
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+ CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+License: Apache-2.0
+ Licensed under the Apache License, Version 2.0 (the "License"); you may
+ not use this file except in compliance with the License. You may obtain
+ a copy of the License at http://www.apache.org/licenses/LICENSE-2.0
+ .
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+ .
+ On Debian systems, the complete text of the Apache License, Version 2.0
+ can be found in "/usr/share/common-licenses/Apache-2.0". The LLVM
+ exception that target-lexicon adds, and the Unlicense and Unicode-3.0
+ texts, are in third-party-licenses.txt.gz with those crates.

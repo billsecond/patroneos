@@ -1,0 +1,278 @@
+# Notepad
+
+PatroneOS's plain text editor, packaged as `patrone-notepad`: a Rust and
+GTK 4 app (`org.patrone.Notepad`), and the default app for plain text
+(`patrone-default-apps`), with GNOME's Text Editor as the fallback.
+
+```
+notepad [--new-window] [FILE...]
+patrone-notepad [--new-window] [FILE...]
+```
+
+It's one process for every window: opening a file while Notepad's running
+opens it in a tab of the window last used (or a new window, if Settings
+says so, or with `--new-window`). A file that's already open shows its
+tab. A file that isn't there yet opens empty, and saving makes it.
+
+## The window
+
+- **Patrone's header bar**: the side panel's button, the **tabs** as pills
+  (the selected one tinted Patrone Blue), **+** for a new tab, command
+  search and Settings, and the window's buttons. A tab with unsaved
+  changes shows a dot where its close button is, and the close button
+  again when the pointer's over it. Drag a tab to move it along; with only
+  one tab, dragging it moves the window. A middle click closes a tab. A
+  right click has Pin or unpin tab, Version history, Close tab and Close
+  other tabs. Pinned tabs show a pin, stay at the start, and a middle
+  click or Close other tabs leaves them. Closing the last tab closes the
+  window. A new note is named after its first line until it's saved, and
+  Save as suggests that name.
+- **File, Edit and View**, in a slim row under the header bar:
+  - File: New tab (Ctrl+N or Ctrl+T), New window (Ctrl+Shift+N), Open
+    (Ctrl+O, several files at once), Save (Ctrl+S), Save as
+    (Ctrl+Shift+S), Save all (Ctrl+Alt+S), Version history, Print
+    (Ctrl+P), Export as HTML (Markdown), Close tab (Ctrl+W), Close window
+    (Ctrl+Shift+W), Exit.
+  - Edit: Undo (Ctrl+Z), Redo (Ctrl+Y or Ctrl+Shift+Z), Cut, Copy, Paste,
+    Delete, Find (Ctrl+F), Find next (F3), Find previous (Shift+F3),
+    Replace (Ctrl+H), Go to line (Ctrl+G), Select all (Ctrl+A), Time and
+    date (F5), Font (opens Settings).
+  - View: Zoom in (Ctrl++), Zoom out (Ctrl+-), Reset zoom (Ctrl+0), also
+    Ctrl and the mouse wheel; Status bar; Word wrap; Side panel (F9);
+    Line numbers; Highlight current line; Command search (Ctrl+K);
+    Formatted Markdown (Ctrl+Shift+M); Markdown preview (Ctrl+Alt+P).
+- **The side panel**: Open (the window's tabs), Recent (files opened and
+  saved, from GTK's recent files list) and Outline (a Markdown file's
+  headings; choosing one goes to it).
+- **Command search** (Ctrl+K): type a few words, such as "word wrap",
+  "line endings crlf" or "go to line", and the commands they match show
+  with their keys; Enter or a click runs one. It lists only what can run
+  now.
+- **The text**, plain, in PatroneOS Mono at 11 points unless Settings
+  says otherwise, optionally with line numbers and the cursor's line
+  shaded. Markdown files show formatted (below).
+- **The status bar**: the cursor's line and column, the number of
+  characters (or how many of them are selected), a Markdown file's words
+  and reading time (at 200 words a minute), its Formatted/Markdown switch,
+  a zoom slider and the tab's zoom (click it to reset), and the file's
+  line endings and encoding: click either to change how the file's saved.
+- **Find and replace** in a box over the top right of the text. It finds as
+  you type; Enter finds the next match and Shift+Enter the one before. The
+  arrow shows the Replace row (Replace, Replace all, which Undo takes back
+  in one step). The options button has Match case and Wrap around. Esc
+  closes it.
+- Ctrl+Tab and Ctrl+Shift+Tab (or Ctrl+Page Down and Up) go through the
+  tabs. Files dropped on the text open in tabs.
+
+## Version history
+
+While Restore open tabs (auto-save) is on, Notepad keeps versions of each
+file, and of each note that isn't saved yet: one every few minutes while it
+changes (when the session's kept), one each time it's saved, and one of
+the changes a tab loses when it's closed with Don't save. File › Version
+history (or a tab's right click) lists them, newest first, with each one's
+text; Restore this version puts it in the tab as an edit, which Undo takes
+back and Save writes. A note's versions follow it to its file when it's
+first saved.
+
+They're in `~/.local/state/patrone-notepad/history/` (on Windows,
+`%LOCALAPPDATA%\patrone-notepad\history`), a folder for each document.
+Each keeps its newest 50, none older than 30 days, all of them together
+under 100 MB, and texts over 4 MB aren't kept. With auto-save off, none are
+kept, and turning it off deletes them.
+
+## Markdown
+
+Each tab is **Markdown** or **plain text**, switched from the status bar
+(its menu also has Show formatted and Preview beside it), View or command
+search. New tabs start in Markdown while Settings › Markdown formatting is
+on; a Markdown file (`.md`, `.markdown` and the like) opens in Markdown and
+any other file in plain text; Save as suggests `.md` or `.txt` to match,
+and saving under a new name switches the tab by that name. A Markdown tab
+shows formatted while you edit it: headings, **bold**, *italic*, ~~strikethrough~~, inline code,
+links, bulleted and numbered lists, task lists with boxes you can tick,
+quotes, code blocks, tables, rules and images. Body text and headings are
+in PatroneOS Sans, code, code blocks and tables in PatroneOS Mono. The
+markup is hidden except on the lines being edited, where it shows faintly,
+so it can be changed like any other text. Ctrl+click opens a link (a web
+address in the browser, a file in its app). Images come from files, by
+their path or relative to the document; nothing is fetched from the
+network.
+
+**The text doesn't change**: the formatted view only styles it and hides
+the markup, so what's saved is the Markdown as typed, and a file opened
+and saved comes back byte for byte. `formatted.rs` has a test that opens
+every Markdown file in this repository that way and checks the bytes
+(`cargo test -- --ignored`, in a desktop session). Copying copies the
+Markdown, hidden markup included.
+
+The **formatting bar** under the menus has:
+
+| Button | Keys | What it does |
+| --- | --- | --- |
+| Heading list | Ctrl+Alt+1 to 6, Ctrl+Alt+0 | The lines as a heading of that level, or body text |
+| Bold, Italic, Strikethrough | Ctrl+B, Ctrl+I, Ctrl+Shift+X | Wraps the selection (or the word at the cursor) in `**`, `*` or `~~`, or takes them off |
+| Bulleted list, Numbered list | Ctrl+Shift+8, Ctrl+Shift+7 | `- ` or `1. ` on each selected line, or off when they all have it |
+| Link | Ctrl+Shift+K | Asks for the words and the address: `[words](address)` |
+| Clear formatting | Ctrl+\ | Takes the Markdown off the selection (or the line), leaving the words |
+| Preview | Ctrl+Alt+P | The document formatted throughout, read only, beside its Markdown, scrolling with it |
+| Outline | | The side panel's outline: the document's headings; choosing one goes to it |
+
+View › Formatted Markdown, or Show formatted in the status bar's menu
+(Ctrl+Shift+M), shows the tab's Markdown as typed instead, in the plain
+text font. File › Export as HTML saves it as a web page (PatroneOS's fonts,
+light styling). Settings › Markdown formatting turns all of it off: Markdown
+files are then plain text like any other. A file over a million characters
+stays plain.
+
+## Fonts
+
+Notepad names PatroneOS's own fonts (`fonts-patroneos`, which the package
+depends on) rather than relying on the system's defaults: PatroneOS Sans
+for its menus, tabs, status bar, Settings and dialogs, and for formatted
+Markdown; PatroneOS Mono for plain text (the default in Settings) and
+Markdown's code. Settings' font list starts with the five PatroneOS
+families (Mono, Sans, Document, Serif, Classic), then every other one.
+
+## Settings
+
+Settings opens as a tab of its own. Every change applies at once, in every
+window, and is kept in `~/.config/patrone-notepad/settings.ini`.
+
+| Setting | Choices | Default |
+| --- | --- | --- |
+| Theme | Light, Dark, Same as the desktop | Same as the desktop |
+| Font | Any installed family, its styles, and a size from 8 to 72 points, with a preview | PatroneOS Mono, Regular, 11 |
+| Word wrap | On or off (also View › Word wrap) | On |
+| Line numbers | On or off (also View) | Off |
+| Highlight current line | On or off (also View) | Off |
+| Markdown formatting | On or off | On |
+| Where files open | In a new tab, In a new window | In a new tab |
+| Restore open tabs | On or off | On |
+
+The status bar and find options (Match case, Wrap around) are kept there
+too.
+
+## Restoring open tabs (auto-save)
+
+With **Restore open tabs** on, Notepad keeps every window's tabs, and
+their unsaved changes, as you work: a moment after each change, and when
+it closes. They come back the next time it starts, each tab as it was
+(still unsaved, with its dot), at its place in the text and its zoom. The
+files themselves change only when you save them.
+
+They're kept in `~/.local/state/patrone-notepad/session/`: `session.ini`
+lists the windows and tabs, and the text of a tab that has unsaved
+changes, or was never saved, is in a file of its own beside it. A tab with
+no unsaved changes is read from its file again.
+
+So with it on, closing the last window asks nothing. Closing a tab still
+asks about its unsaved changes, and so does closing one window while
+another stays open (nothing would keep its tabs). File › Exit keeps every
+window.
+
+With it off, Notepad starts with one new tab, and closing a window (or
+Exit) asks about each tab with unsaved changes in turn: Save, Don't save
+or Cancel. Turning it off deletes what was kept.
+
+## Files
+
+Notepad reads UTF-8 (with or without a byte order mark), UTF-16 (little or
+big endian, with its byte order mark) and, for anything else, CP1252, which
+every byte can be read as. It notes the line endings the file uses most
+(LF, CRLF or CR), shows plain lines, and saves with the same encoding and
+line endings, or the ones chosen in the status bar. New tabs are UTF-8 with
+LF. Saving in CP1252 text it can't hold asks first: save as UTF-8, save
+anyway (those characters become question marks), or cancel.
+
+Files are read and written through GIO, so files on network drives work
+too, and a file is replaced whole when it's saved (written beside it, then
+moved over it).
+
+## Printing
+
+File › Print prints the tab's text in Notepad's font at its own size (not
+the tab's zoom), wrapped to the page, with the file's name at the top of
+each page and "Page N of M" at the bottom. GTK's print dialog sets up the
+page and can print to a PDF file.
+
+## Licences
+
+Notepad is GPL-3.0-or-later. Settings › About and licences shows its
+licence, what it's built with and under which licence (GTK 4, GLib,
+Pango, Cairo, HarfBuzz, gdk-pixbuf and graphene, LGPL-2.1-or-later or
+MIT; the gtk-rs bindings, pulldown-cmark and Rust's standard library, MIT
+or Apache-2.0; PatroneOS's fonts, OFL 1.1), and the full licence texts of
+the 69 Rust crates compiled into it.
+
+- PatroneOS: the package's `copyright` file names every licence, and
+  `third-party-licenses.txt.gz` beside it has each crate's own licence
+  and notices (`packaging/third-party-licenses.sh`). GTK and the rest
+  are Ubuntu's packages, linked as shared libraries, each with its own
+  copyright file; the fonts are `fonts-patroneos`'s.
+- Windows: the zip's `licenses` folder has Notepad's licence, the
+  crates' (`rust-crates.txt`), the fonts' OFL, and each MSYS2 package's
+  licence, with `SOURCES.txt` listing every package, its version and the
+  page its source is on. The GTK libraries stay DLLs, unchanged, which
+  meets the LGPL: anyone can put their own build in their place.
+
+## Building
+
+```
+cargo build --release
+cargo test
+```
+
+It needs GTK 4.22 (`libgtk-4-dev`) and builds with Rust 1.93, Ubuntu
+26.04's. The package: `./packaging/build.sh patrone-notepad -d` on the dev
+VM (`packaging/README.md`).
+
+## Windows
+
+The same code builds for 64-bit Windows 10 and 11 as **Patrone Notepad**
+(`patrone-notepad.exe`; its window titles say Patrone Notepad there too).
+It installs for one account, with no administrator rights, in
+`%LOCALAPPDATA%\Programs\Patrone Notepad`, with a Start menu entry, and
+doesn't change which app opens any kind of file. Its folder has the GTK
+runtime it needs (from MSYS2) and PatroneOS's five fonts, which it loads
+for itself without installing them (`load_bundled_fonts` in `app.rs`,
+through Pango's `add_font_file`). Settings and kept tabs are in
+`%LOCALAPPDATA%\patrone-notepad`.
+
+To build it, on Windows:
+
+1. Rust from rustup (https://rustup.rs).
+2. MSYS2 (https://www.msys2.org), in `%LOCALAPPDATA%\msys64` for one
+   account: unpack `msys2-base-x86_64-DATE.tar.xz` from
+   https://github.com/msys2/msys2-installer/releases there (check it
+   against its `.sha256`), then bring it up to date, twice:
+   `%LOCALAPPDATA%\msys64\usr\bin\bash.exe -lc "pacman -Syuu --noconfirm"`.
+   MSYS2's own installer works too (pass its folder as `-Msys2`).
+3. From this checkout:
+   `powershell -ExecutionPolicy Bypass -File notepad\windows\build.ps1`.
+   The first run installs MSYS2's GTK 4, gcc, pkgconf, librsvg, Adwaita
+   icons and ntldd, and Rust's `stable-x86_64-pc-windows-gnu` toolchain
+   (`-SkipPackages` skips that).
+
+It builds with Rust's `x86_64-pc-windows-gnu` target against MSYS2's
+MINGW64 libraries, then puts the program, every DLL it needs (found with
+`ntldd`), GLib's `gdbus.exe` (which keeps it one process), gdk-pixbuf's
+image loaders, GTK's schemas, the Adwaita and hicolor icons, Notepad's
+icon (also as an `.ico`, drawn from the SVG at seven sizes), the PatroneOS
+fonts release `fonts/release.txt` pins (checked against its checksum),
+and the licences (Notepad's, its Rust crates', each MSYS2 package's, and
+where their source is) in one folder laid out like MSYS2's (`bin`, `lib`,
+`share`), and zips it with `install.ps1`, `uninstall.ps1` and
+`README.txt`: `out\windows\patrone-notepad-VERSION-windows-x86_64.zip`.
+
+To install that zip on a Windows PC: unpack it, run `install.ps1` with
+PowerShell (`powershell -ExecutionPolicy Bypass -File .\install.ps1`), and
+open Patrone Notepad from the Start menu. `uninstall.ps1` removes it
+(`-RemoveSettings` its settings too).
+
+`data/style.css` is the look; `data/over-theme.css` keeps the tabs readable
+under Patrone Settings' title bar styles, and `src/live_style.rs` (the same
+in Patrone's other apps) follows a new theme or title bar button style from
+Patrone Settings while Notepad runs. The icon, `data/org.patrone.Notepad.svg`,
+is Patrone's own: a page with a folded corner and lines of text on a
+Patrone-blue tile.

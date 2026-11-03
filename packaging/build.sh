@@ -12,6 +12,7 @@
 #   ./packaging/build.sh patrone-desktop
 #   ./packaging/build.sh patrone-unpack -d
 #   ./packaging/build.sh patrone-task-manager -d
+#   ./packaging/build.sh patrone-notepad -d
 #   ./packaging/build.sh patrone-browser-chooser -d
 #   ./packaging/build.sh fonts-patroneos      (fetches its pinned release)
 #   ./packaging/build.sh fonts-patrone-sans   (transitional)
@@ -42,6 +43,7 @@ case $package in
     patrone-desktop) source_dir=desktop ;;
     patrone-unpack) source_dir=unpack ;;
     patrone-task-manager) source_dir=task-manager ;;
+    patrone-notepad) source_dir=notepad ;;
     patrone-browser-chooser) source_dir=browser-chooser ;;
     fonts-patroneos | fonts-patrone-sans) source_dir=fonts ;;
     patrone-software) source_dir=software ;;

@@ -122,6 +122,99 @@ Done:
 
 Waiting on the user:
 
+- **Notepad** (the user, 2026-11-03: "build a notepad application ... and
+  please build it in RUST", "allowing me to turn off the auto-save option";
+  `notepad/README.md`, package `patrone-notepad` 0.1.0): a Rust and GTK 4
+  text editor with tabs in the title bar, File, Edit and View menus,
+  Settings as a tab, find and replace, go to line, zoom, printing, a font
+  of your choice (PatroneOS Mono by default) and a status bar. By default
+  it keeps open tabs and their unsaved changes between sessions
+  (Settings → Restore open tabs turns that off). `patrone-default-apps`
+  0.2.3 makes it the app for plain text, with GNOME's Text Editor as the
+  fallback, and `patrone-desktop` 0.2.8 recommends it; the command is
+  `notepad`. On PatroneDev, `patrone-notepad` 0.1.0 and
+  `patrone-default-apps` 0.2.3 are installed from the branch build (not
+  `patrone-desktop` 0.2.8, which only adds the recommendation). Checked
+  with the installed package in a throwaway GNOME Shell (its own state
+  folder too): found in the Start menu, opened, tabs (new, switching,
+  dragging, closing one with unsaved changes), Open, Save, Save as, files
+  opened through `gio open` going to the running window, find and
+  replace, go to line, zoom, dark theme, printing to PDF (3 pages, header
+  and footer), and Restore open
+  tabs both ways (on: tabs and unsaved text came back after closing; off:
+  closing asked to save, and it started with an empty tab), and its look
+  in dark with the user's own theme (Studio, Wide buttons). In the user's
+  own desktop it was only launched over SSH (it ran, and its session file
+  had the tab), not looked at: the VM's screen shows the login screen, so
+  `vmshot.ps1` can't see that desktop. Not tried: dropping files on the
+  window, a real printer, and Patrone Settings' other themes and title bar
+  buttons. Other installs, once it's published:
+  `sudo apt update && sudo apt install patrone-notepad`.
+
+  **0.2.0 adds Markdown and PatroneOS's fonts** (the user: "allow it to
+  open markdown and edit in markdown just like notepad does but better";
+  "And use the patrone os font's too"): `.md` files show formatted, with a
+  formatting bar, an outline, a switch to the raw Markdown and Export as
+  HTML (`notepad/README.md`, "Markdown"). Installed on PatroneDev from the
+  branch, with `patrone-default-apps` 0.2.3 rebuilt (it now sends
+  `text/markdown` to Notepad). Checked: every Markdown file in the repo
+  (35) shown formatted comes back byte for byte (the ignored test in
+  `formatted.rs`, run in the throwaway shell's display); in the app, six
+  of them (README.md, docs/PLAN.md, NEXT.md, COMPLIANCE.md,
+  branding/README.md, notepad/README.md) opened, moved through, edited
+  back to the same text and saved, identical; the formatted view, ticking
+  tasks, images, rules, tables, code blocks, the formatting keys, the
+  outline, Link, Export as HTML, turning formatting off, and dark mode.
+  `fc-match` gives each of the five PatroneOS families itself, and the
+  font list starts with them.
+
+  **0.3.0: Patrone's own interface, and version history** (the user, of
+  a list of interface changes: "Ok, do it, not focus mode"): Patrone's
+  header bar with the tabs as pills and the menus in a slim row under it,
+  a side panel (open tabs, recent files, outline), command search
+  (Ctrl+K), a zoom slider and a Markdown file's words and reading time in
+  the status bar, a Markdown preview beside the text, version history
+  (only while auto-save is on, bounded by count, age and size), line
+  numbers, a shaded current line, pinned tabs, and new notes named after
+  their first line. Also an About window with every licence, and the
+  copyright file naming them all (the user asked whether it's "fully
+  legal"). Installed on PatroneDev from the branch. Checked in the
+  throwaway shell: each of those, light and dark; version history kept on
+  save, restored and undone, and deleted when auto-save was turned off,
+  with nothing kept while it was off; and all 29 tests, the Markdown round
+  trip on the repo's 35 files included.
+
+  **0.3.1: new tabs are Markdown too** (the user: "why doesn't the
+  formated markdown work too"): a tab was Markdown only when its file was
+  named `.md`, so a new tab never was. Each tab now has a Markdown/Plain
+  text mode (status bar, View, command search); new tabs start in
+  Markdown while the setting's on, files by their names, and Save as
+  suggests `.md` or `.txt` to match. Installed on PatroneDev. Checked in
+  the throwaway shell by typing in a new tab (formatted as typed), and in
+  the user's own desktop with a separate copy on its Wayland display and
+  a private D-Bus session: a new tab started in Markdown, and text put in
+  through the app's own actions showed as Heading 1 with its `# ` hidden
+  (read through AT-SPI; no screenshot tool reaches that desktop). The
+  user was using the desktop then (an enhanced session, which a check of
+  TCP 3389 doesn't see), so the test windows showed on their screen.
+  **Lesson:** a private D-Bus session started with the user's
+  `XDG_RUNTIME_DIR` runs its own accessibility bus launcher, which removed
+  the user's `/run/user/1000/at-spi/bus` socket when it ended; apps opened
+  after that can't reach the accessibility bus until
+  `at-spi-dbus-bus.service` is restarted or the user signs in again. Give
+  such a session its own `XDG_RUNTIME_DIR`.
+
+  **A Windows build** (the user: "Then install it here on this windows
+  environment as well as discribe how to install it on another
+  environemtn"): `notepad/windows/build.ps1` makes a zip whose
+  `install.ps1` installs Patrone Notepad for one account (no
+  administrator, a Start menu entry, no file associations). Not built or
+  run yet: running MSYS2 on the user's PC (unpacked in
+  `%LOCALAPPDATA%\msys64`, its checksum checked) was refused by Claude
+  Code's permission check, so it waits for the user to allow that or to
+  run `build.ps1` themselves. The scripts only parse so far, and whether
+  Pango loads the bundled fonts on Windows (`add_font_file`) is untried.
+
 - **Patrone Software's Featured tab** (the user, 2026-10-31: "please feature
   only for now, the MailCraft, the Artcraft Launcher and the Artcraft PDF
   and the Portal for TEams, Wordcraft, Gridcraft. Add the ScreeGrabCraft

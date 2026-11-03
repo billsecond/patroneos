@@ -1,3 +1,11 @@
+patrone-default-apps (0.2.3) resolute; urgency=medium
+
+  * Plain text, Markdown and empty files open in Notepad (patrone-notepad,
+    now recommended), with GNOME's Text Editor as the fallback when it
+    isn't installed.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 12:00:00 -0600
+
 patrone-default-apps (0.2.2) resolute; urgency=medium
 
   * The system's new name, PatroneOS (2026-10-29), in its settings' notes

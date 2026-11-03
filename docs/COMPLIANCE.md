@@ -530,7 +530,7 @@ would let it come back; nothing else needs it.
 ## 8. The Rust apps shipped none of their crates' notices
 
 **Confirmed problem, fixed.** `patrone-terminal`, `-file-manager`,
-`-settings`, `-unpack` and `-task-manager` link their crates statically
+`-settings`, `-unpack`, `-task-manager` and, since 2026-11-03, `-notepad` link their crates statically
 (60 to 75 crates in each build, 36 of them compiled into Patrone
 Terminal's binary, by `cargo deny` and `cargo metadata`, which agree), plus
 Rust's standard library. The crates are MIT,

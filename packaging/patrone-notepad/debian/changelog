@@ -1,0 +1,103 @@
+patrone-notepad (0.3.1) resolute; urgency=medium
+
+  * New tabs are Markdown, formatted as you type, while Settings' Markdown
+    formatting is on. Before, only files named .md were: a new tab never
+    was, though its setting said it should be.
+  * Each tab is Markdown or plain text, switched from the status bar (with
+    Show formatted and Preview beside it in the same menu), View or
+    command search. A .md file opens in Markdown, any other file in plain
+    text, and Save as under a new name switches by its name.
+  * Save as suggests a .md file for a Markdown tab and a .txt file for a
+    plain text one.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 17:00:00 -0600
+
+patrone-notepad (0.3.0) resolute; urgency=medium
+
+  * Patrone's own header bar: the side panel's button, the tabs as pills
+    (the selected one in Patrone Blue), a new tab button, command search
+    and Settings; the File, Edit and View menus, with the same items and
+    keys, in a slim row under it.
+  * A side panel (View, F9): the window's open tabs, recent files, and a
+    Markdown file's outline, its headings, to go to one.
+  * Command search (Ctrl+K): type a few words ("word wrap", "line endings
+    crlf", "go to line") and run the command they find. Link moves to
+    Ctrl+Shift+K.
+  * The status bar: a zoom slider (its percentage resets it), and a
+    Markdown file's words and reading time, beside the line endings' and
+    encoding's menus.
+  * A Markdown file's preview beside it (Ctrl+Alt+P, the formatting bar's
+    Preview), formatted throughout and scrolling with the text.
+  * Version history (File, a tab's right click): a version of each file,
+    and each note not saved yet, every few minutes while it changes, when
+    it's saved, and when its changes are closed without saving, to look
+    at and restore (Undo takes a restore back). Each keeps its newest 50,
+    none older than 30 days, under 100 MB in all, in
+    ~/.local/state/patrone-notepad/history. Only while Restore open tabs
+    (auto-save) is on; turning it off deletes them.
+  * Line numbers and a shaded current line (View, or Settings); pinned
+    tabs (a tab's right click), which stay at the start and aren't closed
+    by a middle click or Close other tabs; and a new note named after its
+    first line, which Save as suggests as its file name.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 16:00:00 -0600
+
+patrone-notepad (0.2.0) resolute; urgency=medium
+
+  * Markdown: .md files show formatted while they're edited. Headings,
+    bold, italic, strikethrough, inline code, links (Ctrl+click opens
+    them), bulleted, numbered and task lists (their boxes can be ticked),
+    quotes, code blocks, tables, rules and images (from files, by their
+    path or beside the document) show as they'd look, with the markup
+    hidden except on the lines being edited. The text itself doesn't
+    change: opening and saving a file leaves it exactly as it was.
+  * A formatting bar under the menus for Markdown files: the line's heading
+    level (Ctrl+Alt+1 to 6, Ctrl+Alt+0 for text), bold (Ctrl+B), italic
+    (Ctrl+I), strikethrough (Ctrl+Shift+X), bulleted (Ctrl+Shift+8) and
+    numbered (Ctrl+Shift+7) lists, link (Ctrl+K), clear formatting
+    (Ctrl+\), and an outline of the headings to go to one.
+  * View › Formatted Markdown, and a switch in the status bar (Ctrl+Shift+M),
+    show a Markdown file as typed instead; Settings › Markdown formatting
+    turns it off for every file. File › Export as HTML saves a Markdown
+    file as a web page.
+  * PatroneOS's fonts by name: PatroneOS Sans for the app's own words and
+    formatted Markdown, PatroneOS Mono for plain text and code. The font
+    list starts with the five PatroneOS families. Depends on
+    fonts-patroneos, which it recommended before.
+  * Markdown files (text/markdown) open in Notepad.
+  * Save with nothing changed leaves the file alone.
+  * Settings › About and licences: Notepad's licence, what it's built
+    with and their licences, and the full texts of its Rust crates'
+    (third-party-licenses.txt.gz). The copyright file names every licence:
+    the crates' (MIT, Apache-2.0, the Unlicense, Unicode-3.0), GTK's and
+    its libraries' (from their own packages) and the fonts' (OFL).
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 14:00:00 -0600
+
+patrone-notepad (0.1.0) resolute; urgency=medium
+
+  * First package: Notepad, a plain text editor with tabs across the title
+    bar and a + button for a new one; File, Edit and View menus with
+    Settings at the end of their row; and a status bar with the cursor's
+    line and column, the number of characters (and how many are selected),
+    the zoom, the line endings and the encoding, the last two of which can
+    be changed from there.
+  * New tab, New window, Open, Save, Save as, Save all, Print, Close tab,
+    Close window and Exit; Undo, Redo, Cut, Copy, Paste, Delete, Find, Find
+    next and previous, Replace, Go to line, Select all, the time and date,
+    and Font; Zoom, the status bar and word wrap.
+  * Find and replace in a box over the text, finding as you type, with
+    Match case and Wrap around.
+  * Reads UTF-8 (with or without a byte order mark), UTF-16 and CP1252
+    text, with LF, CRLF or CR line endings, and saves it the same way.
+  * Settings: the app's theme (light, dark or the desktop's), the font
+    (PatroneOS Mono, 11 points, by default), word wrap, whether files from
+    other apps open in a new tab or a new window, and whether to restore
+    open tabs: on, Notepad keeps the open tabs and their unsaved changes as
+    you work (in ~/.local/state/patrone-notepad), without changing the
+    files, and brings them back when it starts; off, it starts with a new
+    tab and asks to save changes when it closes.
+  * The notepad command, its launcher entry and Patrone's own icon. Files
+    can be dropped on the window to open them.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 12:00:00 -0600
