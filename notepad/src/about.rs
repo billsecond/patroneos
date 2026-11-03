@@ -18,10 +18,16 @@ const COMPONENTS: &[(&str, &str)] = &[
     ("HarfBuzz", "MIT"),
     ("gdk-pixbuf", "LGPL-2.1-or-later"),
     ("graphene", "MIT"),
-    ("gtk-rs (the Rust bindings: gtk4, glib, gio, pango, cairo-rs)", "MIT"),
+    (
+        "gtk-rs (the Rust bindings: gtk4, glib, gio, pango, cairo-rs)",
+        "MIT",
+    ),
     ("pulldown-cmark (Markdown)", "MIT"),
     ("Rust's standard library", "MIT or Apache-2.0"),
-    ("PatroneOS Sans, Mono, Document, Serif and Classic", "SIL Open Font License 1.1"),
+    (
+        "PatroneOS Sans, Mono, Document, Serif and Classic",
+        "SIL Open Font License 1.1",
+    ),
 ];
 
 /// The app's own folder (the Windows build's), above its `bin`.
@@ -111,6 +117,8 @@ pub fn show(parent: &impl IsA<gtk::Window>) {
         .copyright("© 2026 William Daugherty")
         .license_type(gtk::License::Custom)
         .wrap_license(true)
+        .default_width(640)
+        .default_height(620)
         .build();
     dialog.add_credit_section(
         "Built with",

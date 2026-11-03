@@ -34,6 +34,9 @@ pub struct TabState {
     pub zoom: u32,
     /// A Markdown tab shown formatted (or as typed).
     pub formatted: bool,
+    /// A Markdown tab with its preview beside it.
+    pub preview: bool,
+    pub pinned: bool,
 }
 
 #[derive(Clone, Debug, PartialEq)]
@@ -91,6 +94,8 @@ pub fn save(dir: &Path, windows: &[WindowState]) -> io::Result<()> {
             file.set_integer(&group, "cursor", tab.cursor);
             file.set_integer(&group, "zoom", tab.zoom as i32);
             file.set_boolean(&group, "formatted", tab.formatted);
+            file.set_boolean(&group, "preview", tab.preview);
+            file.set_boolean(&group, "pinned", tab.pinned);
         }
     }
     glib::file_set_contents(dir.join(INDEX), file.to_data().as_bytes())
@@ -150,6 +155,8 @@ pub fn load(dir: &Path) -> Vec<WindowState> {
                 cursor: int(&group, "cursor", 0).max(0),
                 zoom: int(&group, "zoom", 100).clamp(10, 500) as u32,
                 formatted: file.boolean(&group, "formatted").unwrap_or(true),
+                preview: file.boolean(&group, "preview").unwrap_or(false),
+                pinned: file.boolean(&group, "pinned").unwrap_or(false),
             });
         }
         if tabs.is_empty() {
@@ -195,6 +202,8 @@ mod tests {
             cursor: 3,
             zoom: 130,
             formatted: key.is_some(),
+            preview: uri.is_some(),
+            pinned: text.is_none(),
         }
     }
 

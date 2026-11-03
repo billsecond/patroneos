@@ -1,3 +1,33 @@
+patrone-notepad (0.3.0) resolute; urgency=medium
+
+  * Patrone's own header bar: the side panel's button, the tabs as pills
+    (the selected one in Patrone Blue), a new tab button, command search
+    and Settings; the File, Edit and View menus, with the same items and
+    keys, in a slim row under it.
+  * A side panel (View, F9): the window's open tabs, recent files, and a
+    Markdown file's outline, its headings, to go to one.
+  * Command search (Ctrl+K): type a few words ("word wrap", "line endings
+    crlf", "go to line") and run the command they find. Link moves to
+    Ctrl+Shift+K.
+  * The status bar: a zoom slider (its percentage resets it), and a
+    Markdown file's words and reading time, beside the line endings' and
+    encoding's menus.
+  * A Markdown file's preview beside it (Ctrl+Alt+P, the formatting bar's
+    Preview), formatted throughout and scrolling with the text.
+  * Version history (File, a tab's right click): a version of each file,
+    and each note not saved yet, every few minutes while it changes, when
+    it's saved, and when its changes are closed without saving, to look
+    at and restore (Undo takes a restore back). Each keeps its newest 50,
+    none older than 30 days, under 100 MB in all, in
+    ~/.local/state/patrone-notepad/history. Only while Restore open tabs
+    (auto-save) is on; turning it off deletes them.
+  * Line numbers and a shaded current line (View, or Settings); pinned
+    tabs (a tab's right click), which stay at the start and aren't closed
+    by a middle click or Close other tabs; and a new note named after its
+    first line, which Save as suggests as its file name.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 03 Nov 2026 16:00:00 -0600
+
 patrone-notepad (0.2.0) resolute; urgency=medium
 
   * Markdown: .md files show formatted while they're edited. Headings,

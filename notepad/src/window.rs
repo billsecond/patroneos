@@ -1,16 +1,21 @@
-//! A Notepad window: its tabs across the title bar with a button for a new
-//! one, the File, Edit and View menus with Settings at the end of their
-//! row, the text, and a status bar under it (the cursor's line and column,
-//! how many characters, the zoom, the line endings and the encoding).
+//! A Notepad window: Patrone's header bar, with the side panel's button,
+//! the tabs as pills and a button for a new one, command search and
+//! Settings; the File, Edit and View menus in a slim row under it; the side
+//! panel (open tabs, recent files, a Markdown file's outline); the text; and
+//! a status bar (the cursor's line and column, how many characters, a
+//! Markdown file's words and reading time, the zoom, the line endings and
+//! the encoding, each of the last three changed from there).
 //!
 //! Dragging a tab along the title bar reorders the tabs; with only one, it
 //! moves the window, like the rest of the title bar. A middle click closes
-//! a tab. Settings opens as a tab of its own, at the end.
+//! an unpinned tab. Pinned tabs stay at the start, with a pin for their
+//! close button. A right click has Pin, Close, Close others and Version
+//! history. Settings opens as a tab of its own, at the end.
 //!
 //! A Markdown tab has a formatting bar under the menus (headings, bold,
-//! italic, strikethrough, lists, links, clear formatting, and an outline of
-//! its headings), and shows formatted unless the status bar's switch, or
-//! View, says to show it as typed.
+//! italic, strikethrough, lists, links, clear formatting, its outline and
+//! its preview beside it), and shows formatted unless the status bar's
+//! switch, or View, says to show it as typed.
 
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -19,14 +24,17 @@ use gtk::prelude::*;
 use gtk::{gdk, gio, glib, graphene};
 
 use crate::app::{APP_ID, APP_NAME, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP, app};
+use crate::commands::Commands;
 use crate::dialogs::{self, SaveChoice};
 use crate::document::{self, Encoding, LineEnding};
 use crate::find;
 use crate::formatted;
+use crate::history;
 use crate::markdown;
 use crate::session::{TabState, WindowState};
 use crate::settings::Settings;
 use crate::settings_page;
+use crate::sidepanel::SidePanel;
 use crate::tab::{Header, Tab};
 
 #[derive(Clone)]
@@ -47,7 +55,7 @@ enum DragMode {
 const DRAG_THRESHOLD: f64 = 8.0;
 
 /// The actions that act on a document, which do nothing on Settings.
-const DOCUMENT_ACTIONS: [&str; 22] = [
+const DOCUMENT_ACTIONS: [&str; 25] = [
     "save",
     "save-as",
     "print",
@@ -70,10 +78,15 @@ const DOCUMENT_ACTIONS: [&str; 22] = [
     "line-ending",
     "encoding",
     "close-tab",
+    "history",
+    "pin-tab",
+    "close-others",
 ];
 
 /// The actions of a Markdown tab's formatting bar.
-const MARKDOWN_ACTIONS: [&str; 10] = [
+const MARKDOWN_ACTIONS: [&str; 12] = [
+    "md-preview",
+    "outline",
     "md-heading",
     "md-bold",
     "md-italic",
@@ -101,7 +114,13 @@ struct Status {
     bar: gtk::Box,
     position: gtk::Label,
     characters: gtk::Label,
-    zoom: gtk::Label,
+    /// A Markdown file's words and reading time.
+    words: gtk::Label,
+    zoom: gtk::Scale,
+    zoom_label: gtk::Button,
+    /// Set while the bar shows a tab's zoom, so that isn't taken for a
+    /// change.
+    syncing: Cell<bool>,
     /// The labels of the line endings' and encoding's menu buttons.
     line_ending: gtk::Label,
     encoding: gtk::Label,
@@ -133,7 +152,34 @@ impl Status {
         };
         let position = item("Ln 1, Col 1", "Line and column");
         let characters = item("0 characters", "Characters");
-        let zoom = item("100%", "Zoom");
+        let words = item("", "Words, and how long it takes to read");
+        words.set_visible(false);
+        let zoom = gtk::Scale::builder()
+            .orientation(gtk::Orientation::Horizontal)
+            .adjustment(&gtk::Adjustment::new(
+                100.0,
+                ZOOM_MIN as f64,
+                ZOOM_MAX as f64,
+                ZOOM_STEP as f64,
+                50.0,
+                0.0,
+            ))
+            .draw_value(false)
+            .width_request(110)
+            .tooltip_text("Zoom")
+            .css_classes(["zoom-slider"])
+            .build();
+        zoom.add_mark(100.0, gtk::PositionType::Bottom, None);
+        let zoom_label = gtk::Button::builder()
+            .label("100%")
+            .action_name("win.zoom-reset")
+            .tooltip_text("Reset zoom (Ctrl+0)")
+            .css_classes(["status-toggle", "zoom-label"])
+            .build();
+        let zoom_box = gtk::Box::new(gtk::Orientation::Horizontal, 2);
+        zoom_box.add_css_class("status-item");
+        zoom_box.append(&zoom);
+        zoom_box.append(&zoom_label);
         let endings = gio::Menu::new();
         for ending in LineEnding::ALL {
             endings.append(
@@ -167,16 +213,20 @@ impl Status {
         bar.add_css_class("status-bar");
         bar.append(&position);
         bar.append(&characters);
+        bar.append(&words);
         bar.append(&gtk::Box::builder().hexpand(true).build());
         bar.append(&markdown);
-        bar.append(&zoom);
+        bar.append(&zoom_box);
         bar.append(&line_ending_button);
         bar.append(&encoding_button);
         Status {
             bar,
             position,
             characters,
+            words,
             zoom,
+            zoom_label,
+            syncing: Cell::new(false),
             line_ending,
             encoding,
             markdown,
@@ -188,8 +238,6 @@ impl Status {
 struct FormatBar {
     row: gtk::Box,
     heading: gtk::MenuButton,
-    outline: gtk::MenuButton,
-    outline_list: gtk::ListBox,
 }
 
 impl FormatBar {
@@ -225,29 +273,22 @@ impl FormatBar {
                 .css_classes(["format-separator"])
                 .build()
         };
-        let outline_list = gtk::ListBox::builder()
-            .selection_mode(gtk::SelectionMode::None)
-            .css_classes(["outline-list"])
-            .build();
         let outline_box = gtk::Box::new(gtk::Orientation::Horizontal, 6);
         outline_box.append(&gtk::Image::from_icon_name("view-list-symbolic"));
         outline_box.append(&gtk::Label::new(Some("Outline")));
-        let outline = gtk::MenuButton::builder()
+        let outline = gtk::Button::builder()
             .child(&outline_box)
-            .tooltip_text("The document's headings, to go to one")
-            .popover(
-                &gtk::Popover::builder()
-                    .child(
-                        &gtk::ScrolledWindow::builder()
-                            .child(&outline_list)
-                            .hscrollbar_policy(gtk::PolicyType::Never)
-                            .propagate_natural_height(true)
-                            .propagate_natural_width(true)
-                            .max_content_height(420)
-                            .build(),
-                    )
-                    .build(),
-            )
+            .tooltip_text("The document's headings, in the side panel")
+            .action_name("win.outline")
+            .css_classes(["format-outline"])
+            .build();
+        let preview_box = gtk::Box::new(gtk::Orientation::Horizontal, 6);
+        preview_box.append(&gtk::Image::from_icon_name("view-dual-symbolic"));
+        preview_box.append(&gtk::Label::new(Some("Preview")));
+        let preview = gtk::ToggleButton::builder()
+            .child(&preview_box)
+            .tooltip_text("The document formatted, beside its Markdown (Ctrl+Alt+P)")
+            .action_name("win.md-preview")
             .css_classes(["format-outline"])
             .build();
         let row = gtk::Box::new(gtk::Orientation::Horizontal, 2);
@@ -283,7 +324,7 @@ impl FormatBar {
         row.append(&separator());
         row.append(&button(
             "insert-link-symbolic",
-            "Link (Ctrl+K)",
+            "Link (Ctrl+Shift+K)",
             "win.md-link",
         ));
         row.append(&button(
@@ -292,14 +333,10 @@ impl FormatBar {
             "win.md-clear",
         ));
         row.append(&gtk::Box::builder().hexpand(true).build());
+        row.append(&preview);
         row.append(&outline);
         row.set_visible(false);
-        FormatBar {
-            row,
-            heading,
-            outline,
-            outline_list,
-        }
+        FormatBar { row, heading }
     }
 }
 
@@ -312,6 +349,9 @@ pub struct Window {
     format: FormatBar,
     status: Status,
     pub find: Rc<find::Panel>,
+    pub side: Rc<SidePanel>,
+    commands: Rc<Commands>,
+    words_timer: RefCell<Option<glib::SourceId>>,
     tabs: RefCell<Vec<Rc<Tab>>>,
     settings_tab: RefCell<Option<(Rc<Header>, Rc<settings_page::Page>)>>,
     selected: RefCell<Option<Selected>>,
@@ -400,6 +440,7 @@ fn menus() -> gio::Menu {
             ("Save", "win.save"),
             ("Save as…", "win.save-as"),
             ("Save all", "win.save-all"),
+            ("Version history…", "win.history"),
         ]),
     );
     file.append_section(
@@ -463,7 +504,22 @@ fn menus() -> gio::Menu {
             ("Word wrap", "app.word-wrap"),
         ]),
     );
-    view.append_section(None, &section(&[("Formatted Markdown", "win.md-view")]));
+    view.append_section(
+        None,
+        &section(&[
+            ("Side panel", "app.side-panel"),
+            ("Line numbers", "app.line-numbers"),
+            ("Highlight current line", "app.highlight-line"),
+            ("Command search…", "win.commands"),
+        ]),
+    );
+    view.append_section(
+        None,
+        &section(&[
+            ("Formatted Markdown", "win.md-view"),
+            ("Markdown preview", "win.md-preview"),
+        ]),
+    );
 
     let bar = gio::Menu::new();
     bar.append_submenu(Some("File"), &file);
@@ -508,8 +564,9 @@ impl Window {
             }
         }
 
-        // The title bar: the app's icon, the tabs, a new tab button, and the
-        // window's buttons in whichever corner the account put them
+        // Patrone's header bar: the side panel's button, the tabs, a new tab
+        // button, command search and Settings, and the window's buttons in
+        // whichever corner the account put them
         let strip = gtk::Box::new(gtk::Orientation::Horizontal, 2);
         strip.add_css_class("tabs");
         let strip_scroller = gtk::ScrolledWindow::builder()
@@ -529,31 +586,42 @@ impl Window {
         bar.add_css_class("tab-bar");
         bar.append(&window_controls(gtk::PackType::Start));
         bar.append(
-            &gtk::Image::builder()
-                .icon_name(APP_ID)
-                .pixel_size(16)
-                .css_classes(["app-icon"])
+            &gtk::ToggleButton::builder()
+                .icon_name("sidebar-show-symbolic")
+                .tooltip_text("Side panel (F9)")
+                .action_name("app.side-panel")
+                .valign(gtk::Align::Center)
+                .css_classes(["header-button"])
                 .build(),
         );
         bar.append(&strip_scroller);
         bar.append(&new_tab);
         bar.append(&gtk::Box::builder().hexpand(true).build());
-        bar.append(&window_controls(gtk::PackType::End));
-        gtk_window.set_titlebar(Some(&gtk::WindowHandle::builder().child(&bar).build()));
-
-        // The menus, and Settings at the end of their row
-        let menu_row = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-        menu_row.add_css_class("menu-row");
-        menu_row.append(&gtk::PopoverMenuBar::from_model(Some(&menus())));
-        menu_row.append(&gtk::Box::builder().hexpand(true).build());
-        menu_row.append(
+        bar.append(
+            &gtk::Button::builder()
+                .icon_name("system-search-symbolic")
+                .tooltip_text("Command search (Ctrl+K)")
+                .action_name("win.commands")
+                .valign(gtk::Align::Center)
+                .css_classes(["header-button"])
+                .build(),
+        );
+        bar.append(
             &gtk::Button::builder()
                 .icon_name("emblem-system-symbolic")
                 .tooltip_text("Settings")
                 .action_name("win.settings")
-                .css_classes(["settings-button"])
+                .valign(gtk::Align::Center)
+                .css_classes(["header-button"])
                 .build(),
         );
+        bar.append(&window_controls(gtk::PackType::End));
+        gtk_window.set_titlebar(Some(&gtk::WindowHandle::builder().child(&bar).build()));
+
+        // The menus, in a slim row under it
+        let menu_row = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        menu_row.add_css_class("menu-row");
+        menu_row.append(&gtk::PopoverMenuBar::from_model(Some(&menus())));
 
         let stack = gtk::Stack::builder()
             .transition_type(gtk::StackTransitionType::None)
@@ -561,14 +629,24 @@ impl Window {
             .vexpand(true)
             .build();
         let find = find::Panel::new();
-        let overlay = gtk::Overlay::builder().child(&stack).vexpand(true).build();
+        let commands = Commands::new();
+        let side = SidePanel::new();
+        let overlay = gtk::Overlay::builder()
+            .child(&stack)
+            .vexpand(true)
+            .hexpand(true)
+            .build();
         overlay.add_overlay(&find.widget);
+        overlay.add_overlay(&commands.widget);
+        let middle = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        middle.append(&side.widget);
+        middle.append(&overlay);
         let status = Status::new();
         let format = FormatBar::new();
         let body = gtk::Box::new(gtk::Orientation::Vertical, 0);
         body.append(&menu_row);
         body.append(&format.row);
-        body.append(&overlay);
+        body.append(&middle);
         body.append(&status.bar);
         gtk_window.set_child(Some(&body));
 
@@ -581,6 +659,9 @@ impl Window {
             format,
             status,
             find,
+            side,
+            commands,
+            words_timer: RefCell::default(),
             tabs: RefCell::default(),
             settings_tab: RefCell::default(),
             selected: RefCell::default(),
@@ -590,16 +671,10 @@ impl Window {
             me: me.clone(),
         });
         window.find.attach(&window);
+        window.side.attach(&window);
+        window.commands.attach(&window);
         window.add_actions();
-        // The outline lists the headings each time it opens
-        if let Some(popover) = window.format.outline.popover() {
-            let weak = Rc::downgrade(&window);
-            popover.connect_show(move |_| {
-                if let Some(window) = weak.upgrade() {
-                    window.fill_outline();
-                }
-            });
-        }
+        window.connect_status();
 
         // Files dropped on the text open in tabs. Caught on the way down, so
         // the text view doesn't take them as text.
@@ -772,6 +847,31 @@ impl Window {
             window.format_text(formatted::clear_formatting)
         });
         simple("md-link", |window| window.ask_link());
+        simple("outline", |window| window.side.show_outline());
+        simple("commands", |window| {
+            if window.commands.is_shown() {
+                window.commands.hide();
+            } else {
+                window.commands.show();
+            }
+        });
+        simple("history", |window| {
+            if let Some(tab) = window.selected_tab() {
+                // What's there now is a version too
+                window.keep_version(&tab, true);
+                history::show(&window.gtk, &tab);
+            }
+        });
+        simple("pin-tab", |window| {
+            if let Some(tab) = window.selected_tab() {
+                window.set_pinned(&tab, !tab.header.is_pinned());
+            }
+        });
+        simple("close-others", |window| {
+            if let Some(tab) = window.selected_tab() {
+                window.close_others(&tab);
+            }
+        });
         simple("export-html", |window| window.export_html());
         let heading = gio::SimpleAction::new("md-heading", Some(glib::VariantTy::STRING));
         let weak = self.me.clone();
@@ -786,6 +886,18 @@ impl Window {
             }
         });
         self.gtk.add_action(&heading);
+        let preview = gio::SimpleAction::new_stateful("md-preview", None, &false.to_variant());
+        let weak = self.me.clone();
+        preview.connect_activate(move |_, _| {
+            let Some(window) = weak.upgrade() else { return };
+            let Some(tab) = window.selected_tab() else {
+                return;
+            };
+            tab.preview_on.set(!tab.preview_on.get());
+            window.update_markdown(&tab);
+            crate::app::app().schedule_session_save();
+        });
+        self.gtk.add_action(&preview);
         let view = gio::SimpleAction::new_stateful("md-view", None, &true.to_variant());
         let weak = self.me.clone();
         view.connect_activate(move |_, _| {
@@ -872,8 +984,12 @@ impl Window {
     /// Settings changed: the text wraps or doesn't, the status bar shows or
     /// doesn't, Settings' page shows the new choices.
     pub fn apply_settings(&self, settings: &Settings) {
+        self.side.set_shown(settings.side_panel);
         for tab in self.tabs() {
             tab.set_word_wrap(settings.word_wrap);
+            tab.set_line_numbers(settings.line_numbers);
+            tab.set_highlight_line(settings.highlight_line);
+            tab.set_preview(settings.markdown && tab.is_markdown() && tab.preview_on.get());
             let formatted = settings.markdown && tab.is_markdown() && tab.formatted.get();
             if formatted != tab.formatter.is_active() {
                 tab.formatter.set_active(formatted, tab.folder());
@@ -908,7 +1024,12 @@ impl Window {
             .map(|tab| tab.header.widget.clone());
         self.strip
             .insert_child_after(&tab.header.widget, after.as_ref());
-        self.stack.add_child(&tab.scroller);
+        self.stack.add_child(&tab.widget);
+        {
+            let settings = app.settings();
+            tab.set_line_numbers(settings.line_numbers);
+            tab.set_highlight_line(settings.highlight_line);
+        }
         self.tabs.borrow_mut().push(tab.clone());
         app.refresh_fonts();
         tab
@@ -942,6 +1063,10 @@ impl Window {
         tab.line_ending.set(line_ending);
         tab.zoom.set(state.zoom.clamp(ZOOM_MIN, ZOOM_MAX));
         tab.formatted.set(state.formatted);
+        tab.preview_on.set(state.preview);
+        if state.pinned {
+            self.set_pinned(&tab, true);
+        }
         tab.session_key.replace(state.key.clone());
         tab.session_dirty.set(false);
         tab.place_cursor_at(state.cursor.min(tab.buffer.char_count()));
@@ -1002,8 +1127,15 @@ impl Window {
         };
         let changed = on_tab(|window, tab| {
             tab.session_dirty.set(true);
+            tab.history_dirty.set(true);
+            // A new note's name is its first line
+            if tab.file.borrow().is_none() {
+                window.update_header(tab);
+            }
             if window.is_selected(tab) {
                 window.update_status();
+                window.schedule_words();
+                window.side.text_changed();
             }
             app().schedule_session_save();
         });
@@ -1086,12 +1218,43 @@ impl Window {
         click.connect_pressed(move |gesture, _, _, _| {
             gesture.set_state(gtk::EventSequenceState::Claimed);
             match target() {
-                Some((window, Selected::Doc(tab))) => window.close_tab(&tab),
+                // A pinned tab stays
+                Some((window, Selected::Doc(tab))) if !tab.header.is_pinned() => {
+                    window.close_tab(&tab)
+                }
                 Some((window, Selected::Settings)) => window.close_settings(),
-                None => {}
+                _ => {}
             }
         });
         widget.add_controller(click);
+
+        // A right click: the tab's menu
+        if tab.is_some() {
+            let menu = gio::Menu::new();
+            let first = gio::Menu::new();
+            first.append(Some("Pin or unpin tab"), Some("win.pin-tab"));
+            first.append(Some("Version history…"), Some("win.history"));
+            menu.append_section(None, &first);
+            let second = gio::Menu::new();
+            second.append(Some("Close tab"), Some("win.close-tab"));
+            second.append(Some("Close other tabs"), Some("win.close-others"));
+            menu.append_section(None, &second);
+            let popover = gtk::PopoverMenu::from_model(Some(&menu));
+            popover.set_parent(&widget);
+            popover.set_has_arrow(false);
+            let right = gtk::GestureClick::new();
+            right.set_button(gdk::BUTTON_SECONDARY);
+            let target = selection();
+            right.connect_pressed(move |gesture, _, x, y| {
+                gesture.set_state(gtk::EventSequenceState::Claimed);
+                if let Some((window, selected)) = target() {
+                    window.select(selected);
+                    popover.set_pointing_to(Some(&gdk::Rectangle::new(x as i32, y as i32, 1, 1)));
+                    popover.popup();
+                }
+            });
+            widget.add_controller(right);
+        }
 
         let drag = gtk::GestureDrag::new();
         drag.set_button(gdk::BUTTON_PRIMARY);
@@ -1236,7 +1399,7 @@ impl Window {
         let status_bar = app().settings().status_bar;
         let header = match &selected {
             Selected::Doc(tab) => {
-                self.stack.set_visible_child(&tab.scroller);
+                self.stack.set_visible_child(&tab.widget);
                 self.menu_row.set_visible(true);
                 self.status.bar.set_visible(status_bar);
                 self.last_doc.replace(Rc::downgrade(tab));
@@ -1264,6 +1427,8 @@ impl Window {
         self.update_status();
         self.sync_actions();
         self.sync_markdown(&app().settings());
+        self.update_words();
+        self.side.refresh();
         self.scroll_to(&header);
         app().schedule_session_save();
     }
@@ -1314,6 +1479,7 @@ impl Window {
         if self.is_selected(tab) {
             self.update_title();
         }
+        self.side.tabs_changed();
     }
 
     fn update_title(&self) {
@@ -1363,7 +1529,12 @@ impl Window {
             None => format!("{} {}", thousands(total), noun(total)),
         };
         self.status.characters.set_label(&characters);
-        self.status.zoom.set_label(&format!("{}%", tab.zoom.get()));
+        self.status.syncing.set(true);
+        self.status.zoom.set_value(tab.zoom.get() as f64);
+        self.status.syncing.set(false);
+        self.status
+            .zoom_label
+            .set_label(&format!("{}%", tab.zoom.get()));
         self.status
             .line_ending
             .set_label(tab.line_ending.get().label());
@@ -1402,6 +1573,145 @@ impl Window {
                 }
             }
         }
+    }
+
+    /// The status bar's zoom slider zooms the tab.
+    fn connect_status(&self) {
+        let weak = self.me.clone();
+        self.status.zoom.connect_value_changed(move |scale| {
+            let Some(window) = weak.upgrade() else { return };
+            if window.status.syncing.get() {
+                return;
+            }
+            let Some(tab) = window.selected_tab() else {
+                return;
+            };
+            let value = ((scale.value() / ZOOM_STEP as f64).round() as u32 * ZOOM_STEP)
+                .clamp(ZOOM_MIN, ZOOM_MAX);
+            if value != tab.zoom.get() {
+                window.zoom(Some(value as i32 - tab.zoom.get() as i32));
+            }
+        });
+    }
+
+    /// A Markdown file's words and reading time, a moment after it changes.
+    fn schedule_words(&self) {
+        if !self.status.words.is_visible() {
+            return;
+        }
+        if let Some(timer) = self.words_timer.take() {
+            timer.remove();
+        }
+        let weak = self.me.clone();
+        let timer =
+            glib::timeout_add_local_once(std::time::Duration::from_millis(300), move || {
+                if let Some(window) = weak.upgrade() {
+                    window.words_timer.take();
+                    window.update_words();
+                }
+            });
+        self.words_timer.replace(Some(timer));
+    }
+
+    fn update_words(&self) {
+        let tab = self
+            .selected_tab()
+            .filter(|tab| tab.is_markdown() && app().settings().markdown);
+        self.status.words.set_visible(tab.is_some());
+        let Some(tab) = tab else { return };
+        let words = tab.text().split_whitespace().count();
+        // About 200 words a minute
+        let minutes = words.div_ceil(200).max(1);
+        let noun = if words == 1 { "word" } else { "words" };
+        self.status.words.set_label(&format!(
+            "{} {noun} · {minutes} min read",
+            thousands(words as i32)
+        ));
+    }
+
+    /// Keeps a version of the tab's text in version history, while
+    /// auto-save is on: now (`force`), or if it's been a few minutes.
+    pub fn keep_version(&self, tab: &Rc<Tab>, force: bool) {
+        if !app().settings().restore_session || (!force && !tab.history_dirty.get()) {
+            return;
+        }
+        // An unsaved tab's document is named after its session key
+        if tab.file.borrow().is_none() && tab.session_key.borrow().is_none() {
+            tab.session_key
+                .replace(Some(format!("tab-{}-{}", glib::real_time(), tab.id)));
+        }
+        let Some(id) = tab.history_id() else { return };
+        let uri = tab
+            .file
+            .borrow()
+            .as_ref()
+            .map(|file| file.uri().to_string());
+        match history::record(
+            &history::dir(),
+            &id,
+            &tab.title(),
+            uri.as_deref(),
+            &tab.text(),
+            glib::real_time(),
+            force,
+        ) {
+            Ok(_) => tab.history_dirty.set(false),
+            Err(error) => eprintln!(
+                "notepad: couldn't keep a version of {}: {error}",
+                tab.title()
+            ),
+        }
+    }
+
+    /// Pins a tab (it moves to the end of the pinned ones, at the start) or
+    /// unpins it (it moves to just after them).
+    pub fn set_pinned(&self, tab: &Rc<Tab>, pinned: bool) {
+        tab.header.set_pinned(pinned);
+        let mut tabs = self.tabs.borrow_mut();
+        let Some(from) = tabs.iter().position(|other| Rc::ptr_eq(other, tab)) else {
+            return;
+        };
+        let moved = tabs.remove(from);
+        let to = tabs
+            .iter()
+            .take_while(|other| other.header.is_pinned())
+            .count();
+        tabs.insert(to, moved);
+        let after = (to > 0).then(|| tabs[to - 1].header.widget.clone());
+        self.strip
+            .reorder_child_after(&tabs[to].header.widget, after.as_ref());
+        drop(tabs);
+        self.side.tabs_changed();
+        app().schedule_session_save();
+    }
+
+    /// Closes every tab but this one and the pinned ones, asking about each
+    /// one's unsaved changes.
+    fn close_others(&self, keep: &Rc<Tab>) {
+        let window = self.me();
+        let keep = keep.clone();
+        glib::spawn_future_local(async move {
+            for tab in window.tabs() {
+                if Rc::ptr_eq(&tab, &keep) || tab.header.is_pinned() {
+                    continue;
+                }
+                if tab.is_modified() && !window.confirm(&tab).await {
+                    return;
+                }
+                window.remove_tab(&tab);
+            }
+            window.select(Selected::Doc(keep));
+        });
+    }
+
+    /// Whether a command can run now: its action exists and is enabled.
+    pub fn can_run(&self, detailed: &str) -> bool {
+        let (group, name) = detailed.split_once('.').unwrap_or(("win", detailed));
+        let action = match group {
+            "app" => app().gtk.lookup_action(name),
+            _ => self.gtk.lookup_action(name),
+        };
+        action.is_some_and(|action| action.is_enabled())
     }
 
     fn zoom(&self, step: Option<i32>) {
@@ -1483,7 +1793,8 @@ impl Window {
         };
         self.tabs.borrow_mut().remove(index);
         self.strip.remove(&tab.header.widget);
-        self.stack.remove(&tab.scroller);
+        self.stack.remove(&tab.widget);
+        self.side.tabs_changed();
         let app = app();
         if self.tabs.borrow().is_empty() {
             // The session goes on without this window; with no other
@@ -1508,7 +1819,11 @@ impl Window {
         self.select(Selected::Doc(tab.clone()));
         match dialogs::ask_to_save(&self.gtk, &tab.title()).await {
             SaveChoice::Save => self.save_tab(tab, false).await,
-            SaveChoice::DontSave => true,
+            SaveChoice::DontSave => {
+                // In version history, for a change of mind
+                self.keep_version(tab, true);
+                true
+            }
             SaveChoice::Cancel => false,
         }
     }
@@ -1561,6 +1876,7 @@ impl Window {
             Some(tab) => tab,
             None => self.add_tab(),
         };
+        gtk::RecentManager::default().add_item(&file.uri());
         tab.file.replace(Some(file));
         tab.set_text(&decoded.text);
         tab.encoding.set(decoded.encoding);
@@ -1657,7 +1973,7 @@ impl Window {
                 match tab.file.borrow().as_ref() {
                     Some(file) => dialog.set_initial_file(Some(file)),
                     None => {
-                        dialog.set_initial_name(Some("Untitled.txt"));
+                        dialog.set_initial_name(Some(&tab.suggested_name()));
                         if let Some(folder) = self.dialog_folder() {
                             dialog.set_initial_folder(Some(&folder));
                         }
@@ -1691,8 +2007,17 @@ impl Window {
             dialogs::error(&self.gtk, &format!("Couldn't save {name}"), error.message()).await;
             return false;
         }
+        // Its version history goes with it to its (new) file
+        let before = tab.history_id();
+        gtk::RecentManager::default().add_item(&file.uri());
         tab.file.replace(Some(file));
         tab.encoding.set(encoding);
+        if let (Some(before), Some(after)) = (before, tab.history_id())
+            && app().settings().restore_session
+        {
+            history::rename(&history::dir(), &before, &after);
+        }
+        self.keep_version(tab, true);
         // Typing while it saved leaves those changes unsaved
         if tab.text() == text {
             tab.buffer.set_modified(false);
@@ -1711,6 +2036,7 @@ impl Window {
         let settings = app().settings().clone();
         let formatted = settings.markdown && tab.is_markdown() && tab.formatted.get();
         tab.formatter.set_active(formatted, tab.folder());
+        tab.set_preview(settings.markdown && tab.is_markdown() && tab.preview_on.get());
         if self.is_selected(tab) {
             self.sync_markdown(&settings);
         }
@@ -1742,6 +2068,10 @@ impl Window {
         if let Some(action) = self.action("md-view") {
             action.set_state(&formatted.to_variant());
         }
+        let preview = markdown && tab.as_ref().is_some_and(|tab| tab.preview_on.get());
+        if let Some(action) = self.action("md-preview") {
+            action.set_state(&preview.to_variant());
+        }
         if markdown && let Some(tab) = tab {
             let level = formatted::current_heading(&tab.buffer) as usize;
             self.format.heading.set_label(HEADINGS[level.min(6)]);
@@ -1770,61 +2100,6 @@ impl Window {
                 tab.view.grab_focus();
             }
         });
-    }
-
-    /// The outline: each heading, indented by its level; choosing one goes
-    /// to it.
-    fn fill_outline(&self) {
-        let list = &self.format.outline_list;
-        while let Some(row) = list.first_child() {
-            list.remove(&row);
-        }
-        let Some(tab) = self.selected_tab() else {
-            return;
-        };
-        let headings = markdown::parse(&tab.text()).headings;
-        if headings.is_empty() {
-            list.append(
-                &gtk::Label::builder()
-                    .label("No headings yet")
-                    .css_classes(["outline-empty"])
-                    .build(),
-            );
-            return;
-        }
-        for heading in headings {
-            let button = gtk::Button::builder()
-                .child(
-                    &gtk::Label::builder()
-                        .label(if heading.text.is_empty() {
-                            "(untitled)"
-                        } else {
-                            heading.text.as_str()
-                        })
-                        .xalign(0.0)
-                        .ellipsize(gtk::pango::EllipsizeMode::End)
-                        .max_width_chars(48)
-                        .margin_start(12 * (heading.level as i32 - 1))
-                        .build(),
-                )
-                .css_classes(["outline-item", &format!("outline-level-{}", heading.level)])
-                .build();
-            let weak_tab = Rc::downgrade(&tab);
-            let popover = self.format.outline.popover();
-            let start = heading.start as i32;
-            button.connect_clicked(move |_| {
-                if let Some(popover) = &popover {
-                    popover.popdown();
-                }
-                if let Some(tab) = weak_tab.upgrade() {
-                    tab.buffer.place_cursor(&tab.buffer.iter_at_offset(start));
-                    tab.view
-                        .scroll_to_mark(&tab.buffer.get_insert(), 0.0, true, 0.0, 0.1);
-                    tab.view.grab_focus();
-                }
-            });
-            list.append(&button);
-        }
     }
 
     /// Export as HTML: the Markdown tab as a web page, in a file chosen now.

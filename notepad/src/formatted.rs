@@ -101,6 +101,29 @@ impl Tags {
         }
     }
 
+    /// Every tag the view puts on the text.
+    fn all(&self) -> Vec<&gtk::TextTag> {
+        let mut tags = vec![
+            &self.body,
+            &self.quote,
+            &self.code_block,
+            &self.table,
+            &self.table_head,
+            &self.strong,
+            &self.emphasis,
+            &self.strike,
+            &self.code,
+            &self.link,
+            &self.list,
+            &self.done,
+            &self.mark,
+            &self.clear,
+            &self.hidden,
+        ];
+        tags.extend(self.headings.iter());
+        tags
+    }
+
     fn of(&self, style: Style) -> &gtk::TextTag {
         match style {
             Style::Heading(level) => &self.headings[(level.clamp(1, 6) - 1) as usize],
@@ -177,11 +200,18 @@ pub struct Formatter {
     textures: RefCell<HashMap<PathBuf, Option<gdk::Texture>>>,
     /// Set while the view sets its checkboxes, so that isn't a click.
     syncing: Cell<bool>,
+    /// A preview beside the text: every line's markup hidden, and its
+    /// checkboxes only show.
+    read_only: bool,
     me: Weak<Formatter>,
 }
 
 impl Formatter {
-    pub fn new(view: &gtk::TextView, scroller: &gtk::ScrolledWindow) -> Rc<Formatter> {
+    pub fn new(
+        view: &gtk::TextView,
+        scroller: &gtk::ScrolledWindow,
+        read_only: bool,
+    ) -> Rc<Formatter> {
         let buffer = view.buffer();
         let formatter = Rc::new_cyclic(|me| Formatter {
             view: view.clone(),
@@ -199,6 +229,7 @@ impl Formatter {
             images: RefCell::default(),
             textures: RefCell::default(),
             syncing: Cell::new(false),
+            read_only,
             me: me.clone(),
         });
         formatter.connect(scroller);
@@ -261,7 +292,9 @@ impl Formatter {
             };
             // A task's checkbox: ticked here, so the click doesn't also move
             // the text cursor onto its line
-            if let Some(index) = formatter.check_at(x, y) {
+            if !formatter.read_only
+                && let Some(index) = formatter.check_at(x, y)
+            {
                 gesture.set_state(gtk::EventSequenceState::Claimed);
                 let checked = formatter.checks.borrow()[index].is_active();
                 formatter.toggle_task(index, !checked);
@@ -325,6 +358,9 @@ impl Formatter {
     }
 
     fn touch(&self) {
+        if self.read_only {
+            return;
+        }
         if !self.touched.replace(true) && self.active.get() {
             self.schedule(Duration::ZERO);
         }
@@ -402,7 +438,7 @@ impl Formatter {
         }
         let (start, end) = self.buffer.bounds();
         let text = self.buffer.text(&start, &end, true);
-        self.buffer.remove_all_tags(&start, &end);
+        self.remove_tags();
         if text.len() > LIMIT {
             self.parsed.replace(Parsed::default());
             self.images.borrow_mut().clear();
@@ -459,11 +495,22 @@ impl Formatter {
         if let Some(timer) = self.timer.take() {
             timer.remove();
         }
-        let (start, end) = self.buffer.bounds();
-        self.buffer.remove_all_tags(&start, &end);
+        self.remove_tags();
         self.parsed.replace(Parsed::default());
         self.images.borrow_mut().clear();
         self.place();
+    }
+
+    /// Takes the view's tags off the text, leaving others' (the current
+    /// line's).
+    fn remove_tags(&self) {
+        let (start, end) = self.buffer.bounds();
+        for tag in self.tags.all() {
+            self.buffer.remove_tag(tag, &start, &end);
+        }
+        for (_, room) in self.pictures.borrow().iter() {
+            self.buffer.remove_tag(room, &start, &end);
+        }
     }
 
     fn put(&self, widget: &impl IsA<gtk::Widget>, x: i32, y: i32) {
@@ -495,6 +542,7 @@ impl Formatter {
             let check = gtk::CheckButton::builder()
                 .css_classes(["md-task"])
                 .focus_on_click(false)
+                .can_target(!self.read_only)
                 .visible(false)
                 .build();
             let weak = self.me.clone();
@@ -964,7 +1012,7 @@ mod tests {
             buffer.end_irreversible_action();
             buffer.set_modified(false);
 
-            let formatter = Formatter::new(&view, &scroller);
+            let formatter = Formatter::new(&view, &scroller, false);
             formatter.set_dark(false);
             formatter.set_active(true, path.parent().map(Path::to_path_buf));
             let (start, end) = buffer.bounds();

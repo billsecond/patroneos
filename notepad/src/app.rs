@@ -100,7 +100,7 @@ impl App {
                 let dark = is_dark();
                 for window in app().windows() {
                     for tab in window.tabs() {
-                        tab.formatter.set_dark(dark);
+                        tab.set_dark(dark);
                     }
                 }
             });
@@ -173,7 +173,10 @@ impl App {
                 "win.md-numbers",
                 &["<Control><Shift>7", "<Control>ampersand"],
             ),
-            ("win.md-link", &["<Control>k"]),
+            ("win.md-link", &["<Control><Shift>k"]),
+            ("win.md-preview", &["<Control><Alt>p"]),
+            ("win.commands", &["<Control>k"]),
+            ("app.side-panel", &["F9"]),
             ("win.md-clear", &["<Control>backslash"]),
             ("win.md-view", &["<Control><Shift>m"]),
             ("win.md-heading::0", &["<Control><Alt>0"]),
@@ -198,10 +201,7 @@ impl App {
 
         // Word wrap and the status bar are settings, the same in every window
         let settings = self.settings.borrow();
-        for (name, state) in [
-            ("word-wrap", settings.word_wrap),
-            ("status-bar", settings.status_bar),
-        ] {
+        for (name, state) in toggles(&settings) {
             let action = gio::SimpleAction::new_stateful(name, None, &state.to_variant());
             action.connect_activate(move |action, _| {
                 let on = !action
@@ -210,7 +210,10 @@ impl App {
                     .unwrap_or(false);
                 app().update_settings(|settings| match name {
                     "word-wrap" => settings.word_wrap = on,
-                    _ => settings.status_bar = on,
+                    "status-bar" => settings.status_bar = on,
+                    "side-panel" => settings.side_panel = on,
+                    "line-numbers" => settings.line_numbers = on,
+                    _ => settings.highlight_line = on,
                 });
             });
             self.gtk.add_action(&action);
@@ -239,10 +242,7 @@ impl App {
         {
             self.refresh_fonts();
         }
-        for (name, state) in [
-            ("word-wrap", after.word_wrap),
-            ("status-bar", after.status_bar),
-        ] {
+        for (name, state) in toggles(&after) {
             if let Some(action) = self
                 .gtk
                 .lookup_action(name)
@@ -260,6 +260,7 @@ impl App {
                     timer.remove();
                 }
                 session::clear(&session::dir());
+                crate::history::clear(&crate::history::dir());
                 // If it's turned on again, every tab's text is written anew
                 for window in self.windows() {
                     for tab in window.tabs() {
@@ -405,6 +406,12 @@ impl App {
         }
         let windows = self.windows();
         let states: Vec<_> = windows.iter().filter_map(|window| window.state()).collect();
+        // A version of each changed text, every few minutes
+        for window in &windows {
+            for tab in window.tabs() {
+                window.keep_version(&tab, false);
+            }
+        }
         match session::save(&session::dir(), &states) {
             Ok(()) => {
                 for window in &windows {
@@ -532,6 +539,17 @@ fn load_bundled_fonts() {
             eprintln!("notepad: couldn't load {}: {error}", path.display());
         }
     }
+}
+
+/// The View menu's switches, which are settings, with their states.
+fn toggles(settings: &Settings) -> [(&'static str, bool); 5] {
+    [
+        ("word-wrap", settings.word_wrap),
+        ("status-bar", settings.status_bar),
+        ("side-panel", settings.side_panel),
+        ("line-numbers", settings.line_numbers),
+        ("highlight-line", settings.highlight_line),
+    ]
 }
 
 /// Whether the app shows dark.

@@ -16,29 +16,46 @@ tab. A file that isn't there yet opens empty, and saving makes it.
 
 ## The window
 
-- **Tabs** across the title bar, with **+** for a new one. A tab with
-  unsaved changes shows a dot where its close button is, and the close
-  button again when the pointer's over it. Drag a tab to move it along;
-  with only one tab, dragging it moves the window. A middle click closes
-  a tab. Closing the last tab closes the window.
-- **File, Edit and View** menus, with **Settings** (the gear) at the end of
-  their row:
+- **Patrone's header bar**: the side panel's button, the **tabs** as pills
+  (the selected one tinted Patrone Blue), **+** for a new tab, command
+  search and Settings, and the window's buttons. A tab with unsaved
+  changes shows a dot where its close button is, and the close button
+  again when the pointer's over it. Drag a tab to move it along; with only
+  one tab, dragging it moves the window. A middle click closes a tab. A
+  right click has Pin or unpin tab, Version history, Close tab and Close
+  other tabs. Pinned tabs show a pin, stay at the start, and a middle
+  click or Close other tabs leaves them. Closing the last tab closes the
+  window. A new note is named after its first line until it's saved, and
+  Save as suggests that name.
+- **File, Edit and View**, in a slim row under the header bar:
   - File: New tab (Ctrl+N or Ctrl+T), New window (Ctrl+Shift+N), Open
     (Ctrl+O, several files at once), Save (Ctrl+S), Save as
-    (Ctrl+Shift+S), Save all (Ctrl+Alt+S), Print (Ctrl+P), Close tab
-    (Ctrl+W), Close window (Ctrl+Shift+W), Exit.
+    (Ctrl+Shift+S), Save all (Ctrl+Alt+S), Version history, Print
+    (Ctrl+P), Export as HTML (Markdown), Close tab (Ctrl+W), Close window
+    (Ctrl+Shift+W), Exit.
   - Edit: Undo (Ctrl+Z), Redo (Ctrl+Y or Ctrl+Shift+Z), Cut, Copy, Paste,
     Delete, Find (Ctrl+F), Find next (F3), Find previous (Shift+F3),
     Replace (Ctrl+H), Go to line (Ctrl+G), Select all (Ctrl+A), Time and
     date (F5), Font (opens Settings).
   - View: Zoom in (Ctrl++), Zoom out (Ctrl+-), Reset zoom (Ctrl+0), also
-    Ctrl and the mouse wheel; Status bar; Word wrap.
+    Ctrl and the mouse wheel; Status bar; Word wrap; Side panel (F9);
+    Line numbers; Highlight current line; Command search (Ctrl+K);
+    Formatted Markdown (Ctrl+Shift+M); Markdown preview (Ctrl+Alt+P).
+- **The side panel**: Open (the window's tabs), Recent (files opened and
+  saved, from GTK's recent files list) and Outline (a Markdown file's
+  headings; choosing one goes to it).
+- **Command search** (Ctrl+K): type a few words, such as "word wrap",
+  "line endings crlf" or "go to line", and the commands they match show
+  with their keys; Enter or a click runs one. It lists only what can run
+  now.
 - **The text**, plain, in PatroneOS Mono at 11 points unless Settings
-  says otherwise. Markdown files show formatted (below).
+  says otherwise, optionally with line numbers and the cursor's line
+  shaded. Markdown files show formatted (below).
 - **The status bar**: the cursor's line and column, the number of
-  characters (or how many of them are selected), the tab's zoom, and the
-  file's line endings and encoding. Clicking those two changes how the
-  file's saved.
+  characters (or how many of them are selected), a Markdown file's words
+  and reading time (at 200 words a minute), its Formatted/Markdown switch,
+  a zoom slider and the tab's zoom (click it to reset), and the file's
+  line endings and encoding: click either to change how the file's saved.
 - **Find and replace** in a box over the top right of the text. It finds as
   you type; Enter finds the next match and Shift+Enter the one before. The
   arrow shows the Replace row (Replace, Replace all, which Undo takes back
@@ -46,6 +63,23 @@ tab. A file that isn't there yet opens empty, and saving makes it.
   closes it.
 - Ctrl+Tab and Ctrl+Shift+Tab (or Ctrl+Page Down and Up) go through the
   tabs. Files dropped on the text open in tabs.
+
+## Version history
+
+While Restore open tabs (auto-save) is on, Notepad keeps versions of each
+file, and of each note that isn't saved yet: one every few minutes while it
+changes (when the session's kept), one each time it's saved, and one of
+the changes a tab loses when it's closed with Don't save. File › Version
+history (or a tab's right click) lists them, newest first, with each one's
+text; Restore this version puts it in the tab as an edit, which Undo takes
+back and Save writes. A note's versions follow it to its file when it's
+first saved.
+
+They're in `~/.local/state/patrone-notepad/history/` (on Windows,
+`%LOCALAPPDATA%\patrone-notepad\history`), a folder for each document.
+Each keeps its newest 50, none older than 30 days, all of them together
+under 100 MB, and texts over 4 MB aren't kept. With auto-save off, none are
+kept, and turning it off deletes them.
 
 ## Markdown
 
@@ -74,9 +108,10 @@ The **formatting bar** under the menus has:
 | Heading list | Ctrl+Alt+1 to 6, Ctrl+Alt+0 | The lines as a heading of that level, or body text |
 | Bold, Italic, Strikethrough | Ctrl+B, Ctrl+I, Ctrl+Shift+X | Wraps the selection (or the word at the cursor) in `**`, `*` or `~~`, or takes them off |
 | Bulleted list, Numbered list | Ctrl+Shift+8, Ctrl+Shift+7 | `- ` or `1. ` on each selected line, or off when they all have it |
-| Link | Ctrl+K | Asks for the words and the address: `[words](address)` |
+| Link | Ctrl+Shift+K | Asks for the words and the address: `[words](address)` |
 | Clear formatting | Ctrl+\ | Takes the Markdown off the selection (or the line), leaving the words |
-| Outline | | The document's headings; choosing one goes to it |
+| Preview | Ctrl+Alt+P | The document formatted throughout, read only, beside its Markdown, scrolling with it |
+| Outline | | The side panel's outline: the document's headings; choosing one goes to it |
 
 View › Formatted Markdown, or the status bar's Formatted/Markdown switch
 (Ctrl+Shift+M), shows the tab's Markdown as typed instead, in the plain
@@ -104,6 +139,8 @@ window, and is kept in `~/.config/patrone-notepad/settings.ini`.
 | Theme | Light, Dark, Same as the desktop | Same as the desktop |
 | Font | Any installed family, its styles, and a size from 8 to 72 points, with a preview | PatroneOS Mono, Regular, 11 |
 | Word wrap | On or off (also View › Word wrap) | On |
+| Line numbers | On or off (also View) | Off |
+| Highlight current line | On or off (also View) | Off |
 | Markdown formatting | On or off | On |
 | Where files open | In a new tab, In a new window | In a new tab |
 | Restore open tabs | On or off | On |

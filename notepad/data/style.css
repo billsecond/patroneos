@@ -1,6 +1,7 @@
-/* Notepad's look: a tinted title bar of tabs, the selected tab joined to
-   the menu row under it, a plain white (or dark) page for the text, and a
-   quiet status bar. The palette is set once below and swapped for dark. */
+/* Notepad's look, Patrone's own: a tinted header bar with the tabs as
+   pills (the selected one in Patrone Blue), a slim row of menus, a plain
+   white (or dark) page for the text, an optional side panel, and a quiet
+   status bar. The palette is set once below and swapped for dark. */
 
 window.notepad, window.go-to-dialog, tooltip, popover {
   --frame: #eef2f8;
@@ -14,6 +15,8 @@ window.notepad, window.go-to-dialog, tooltip, popover {
   --selection: rgba(40, 139, 250, 0.30);
   --hover: rgba(0, 0, 0, 0.05);
   --pressed: rgba(0, 0, 0, 0.08);
+  --selected: rgba(40, 139, 250, 0.15);
+  --selected-edge: rgba(40, 139, 250, 0.35);
   --field: #ffffff;
   --field-border: #d9dce0;
   --menu: #fbfbfb;
@@ -35,6 +38,8 @@ window.notepad, window.go-to-dialog, tooltip, popover {
     --selection: rgba(77, 160, 252, 0.40);
     --hover: rgba(255, 255, 255, 0.07);
     --pressed: rgba(255, 255, 255, 0.04);
+    --selected: rgba(77, 160, 252, 0.22);
+    --selected-edge: rgba(77, 160, 252, 0.45);
     --field: #2b2c2f;
     --field-border: #3c3e42;
     --menu: #2b2c2f;
@@ -62,11 +67,12 @@ window.notepad.csd:not(.maximized):not(.fullscreen):not(.tiled):not(.tiled-top):
   border-radius: 15px;
 }
 
-/* --- The title bar of tabs ---------------------------------------------- */
+/* --- Patrone's header bar ----------------------------------------------- */
 
 /* A headerbar node, so the title bar style in the account's gtk.css
    (Patrone Settings) paints it as it paints every app's; this is the look
-   without one. */
+   without one. The tabs are pills in it, the selected one tinted with
+   Patrone Blue. */
 headerbar.tab-bar,
 headerbar.tab-bar:backdrop {
   background-color: var(--frame);
@@ -74,19 +80,21 @@ headerbar.tab-bar:backdrop {
   color: var(--text-secondary);
   box-shadow: none;
   border: none;
-  min-height: 40px;
-  padding: 6px 4px 0 10px;
+  border-bottom: 1px solid var(--divider);
+  min-height: 44px;
+  padding: 0 6px;
 }
 
-.app-icon {
-  margin: 0 10px 6px 4px;
+.tabs {
+  margin: 0 2px;
 }
 
 .tab {
-  min-height: 32px;
+  min-height: 30px;
   min-width: 110px;
+  margin: 6px 1px;
   padding: 0 4px 0 12px;
-  border-radius: 8px 8px 0 0;
+  border-radius: 9px;
   transition: background-color 120ms ease-out;
 }
 
@@ -94,14 +102,21 @@ headerbar.tab-bar:backdrop {
   background-color: var(--hover);
 }
 
+/* A solid page under the tint, so its words read on any title bar style */
 .tab.active {
   background-color: var(--layer);
+  background-image: linear-gradient(var(--selected), var(--selected));
   color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--selected-edge);
+}
+
+.tab.pinned {
+  min-width: 70px;
 }
 
 button.tab-close,
 button.new-tab,
-button.settings-button,
+button.header-button,
 button.find-button,
 menubutton.find-button > button,
 menubutton.status-menu > button {
@@ -115,12 +130,12 @@ button.tab-close {
   min-width: 24px;
   min-height: 24px;
   padding: 0;
-  border-radius: 4px;
+  border-radius: 6px;
 }
 
 button.tab-close:hover,
 button.new-tab:hover,
-button.settings-button:hover,
+button.header-button:hover,
 button.find-button:hover,
 menubutton.find-button > button:hover,
 menubutton.status-menu > button:hover {
@@ -129,9 +144,13 @@ menubutton.status-menu > button:hover {
 
 button.tab-close:active,
 button.new-tab:active,
-button.settings-button:active,
+button.header-button:active,
 button.find-button:active {
   background-color: var(--pressed);
+}
+
+button.header-button:checked {
+  background-color: var(--selected);
 }
 
 /* Unsaved changes: a dot where the close button is */
@@ -143,37 +162,129 @@ button.find-button:active {
 }
 
 button.new-tab {
-  min-width: 32px;
-  min-height: 28px;
-  margin: 0 6px 6px 4px;
-  border-radius: 6px;
+  min-width: 30px;
+  min-height: 30px;
+  margin: 0 4px;
+  border-radius: 9px;
 }
 
-/* --- The menus and Settings ----------------------------------------------- */
+button.header-button {
+  min-width: 34px;
+  min-height: 30px;
+  padding: 0;
+  margin: 0 1px;
+  border-radius: 9px;
+}
+
+/* --- The menus, in a slim row -------------------------------------------- */
 
 .menu-row {
   background-color: var(--layer);
   border-bottom: 1px solid var(--divider);
-  padding: 2px 8px 2px 4px;
+  padding: 0 6px;
+  min-height: 26px;
 }
 
 .menu-row popovermenubar > item {
-  padding: 4px 10px;
-  border-radius: 4px;
-  color: var(--text);
+  padding: 2px 9px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 0.95em;
 }
 
 .menu-row popovermenubar > item:hover,
 .menu-row popovermenubar > item:selected {
   background-color: var(--hover);
+  color: var(--text);
 }
 
-button.settings-button {
-  min-width: 32px;
-  min-height: 30px;
-  padding: 0;
-  border-radius: 6px;
+/* --- The side panel -------------------------------------------------------- */
+
+.side-panel {
+  background-color: var(--frame);
+  border-right: 1px solid var(--divider);
+  padding: 8px 6px;
+}
+
+stackswitcher.side-switcher {
+  margin: 0 4px 4px;
+}
+
+/* GTK's theme makes each of these at least 100 pixels wide */
+stackswitcher.side-switcher > button,
+stackswitcher.side-switcher > button.text-button {
+  min-width: 0;
+  min-height: 26px;
+  padding: 0 8px;
+  font-weight: normal;
+}
+
+.side-list {
+  background: none;
+}
+
+button.side-row {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 5px 10px;
+  margin: 1px 0;
+  border-radius: 8px;
+  font-weight: normal;
   color: var(--text);
+}
+
+button.side-row:hover {
+  background-color: var(--hover);
+}
+
+button.side-row.current {
+  background-color: var(--selected);
+}
+
+.side-detail {
+  font-size: 0.85em;
+  color: var(--text-secondary);
+}
+
+button.outline-level-1 .side-title {
+  font-weight: 600;
+}
+
+.side-hint {
+  padding: 10px 12px;
+  color: var(--text-secondary);
+}
+
+/* --- Command search ------------------------------------------------------- */
+
+.command-panel {
+  background-color: var(--menu);
+  border: 1px solid var(--menu-border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px var(--shadow);
+  padding: 8px;
+  margin-top: 12px;
+  color: var(--text);
+}
+
+.command-list {
+  background: none;
+}
+
+.command-row {
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.command-row:selected {
+  background-color: var(--selected);
+  color: var(--text);
+}
+
+.command-keys {
+  color: var(--text-secondary);
+  font-size: 0.9em;
 }
 
 /* --- Markdown's formatting bar -------------------------------------------- */
@@ -325,6 +436,63 @@ menubutton.status-menu > button {
   border-radius: 4px;
   font-weight: normal;
   color: inherit;
+}
+
+scale.zoom-slider {
+  margin: 0 2px;
+  padding: 0;
+  min-height: 0;
+}
+
+scale.zoom-slider > trough {
+  min-height: 4px;
+}
+
+scale.zoom-slider > trough > slider {
+  min-width: 12px;
+  min-height: 12px;
+  margin: -5px;
+}
+
+button.zoom-label {
+  border-left: none;
+  padding: 0 6px;
+  min-width: 44px;
+}
+
+/* --- Line numbers, the preview, version history --------------------------- */
+
+drawingarea.line-numbers {
+  background-color: var(--layer);
+  border-right: 1px solid var(--divider);
+  font-family: "PatroneOS Mono", monospace;
+}
+
+textview.preview,
+textview.preview > text {
+  background-color: var(--layer);
+}
+
+paned > separator {
+  background-color: var(--divider);
+}
+
+.history-content {
+  padding: 14px 16px 16px;
+}
+
+.history-list {
+  background: none;
+}
+
+.history-list > row {
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+
+.history-list > row:selected {
+  background-color: var(--selected);
+  color: var(--text);
 }
 
 /* --- Find and replace ----------------------------------------------------- */

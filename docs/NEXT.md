@@ -168,6 +168,22 @@ Waiting on the user:
   `fc-match` gives each of the five PatroneOS families itself, and the
   font list starts with them.
 
+  **0.3.0: Patrone's own interface, and version history** (the user, of
+  a list of interface changes: "Ok, do it, not focus mode"): Patrone's
+  header bar with the tabs as pills and the menus in a slim row under it,
+  a side panel (open tabs, recent files, outline), command search
+  (Ctrl+K), a zoom slider and a Markdown file's words and reading time in
+  the status bar, a Markdown preview beside the text, version history
+  (only while auto-save is on, bounded by count, age and size), line
+  numbers, a shaded current line, pinned tabs, and new notes named after
+  their first line. Also an About window with every licence, and the
+  copyright file naming them all (the user asked whether it's "fully
+  legal"). Installed on PatroneDev from the branch. Checked in the
+  throwaway shell: each of those, light and dark; version history kept on
+  save, restored and undone, and deleted when auto-save was turned off,
+  with nothing kept while it was off; and all 29 tests, the Markdown round
+  trip on the repo's 35 files included.
+
   **A Windows build** (the user: "Then install it here on this windows
   environment as well as discribe how to install it on another
   environemtn"): `notepad/windows/build.ps1` makes a zip whose

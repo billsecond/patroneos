@@ -20,6 +20,8 @@ pub struct Page {
     size: gtk::DropDown,
     word_wrap: gtk::Switch,
     markdown: gtk::Switch,
+    line_numbers: gtk::Switch,
+    highlight_line: gtk::Switch,
     open_in: gtk::DropDown,
     restore: gtk::Switch,
     families: Vec<String>,
@@ -120,6 +122,8 @@ impl Page {
         size.set_width_request(90);
         let word_wrap = gtk::Switch::builder().valign(gtk::Align::Center).build();
         let markdown = gtk::Switch::builder().valign(gtk::Align::Center).build();
+        let line_numbers = gtk::Switch::builder().valign(gtk::Align::Center).build();
+        let highlight_line = gtk::Switch::builder().valign(gtk::Align::Center).build();
         let open_in = dropdown(&strings(OpenIn::ALL.iter().map(|open_in| open_in.label())));
         let restore = gtk::Switch::builder().valign(gtk::Align::Center).build();
 
@@ -204,6 +208,18 @@ impl Page {
              Turned off, they're plain text like any other file.",
             &markdown,
         ));
+        content.append(&card(
+            "view-list-ordered-symbolic",
+            "Line numbers",
+            "Each line's number at the left of the text",
+            &line_numbers,
+        ));
+        content.append(&card(
+            "format-justify-fill-symbolic",
+            "Highlight current line",
+            "Shade the line the cursor's on",
+            &highlight_line,
+        ));
 
         content.append(&heading("Files"));
         content.append(&card(
@@ -219,8 +235,9 @@ impl Page {
             "Restore open tabs",
             "Notepad saves your open tabs and their unsaved changes as you work (auto-save), and \
              brings them back when it starts again. Your files change only when you save them. \
-             Turned off, Notepad starts with a new tab and asks whether to save your changes when \
-             you close it.",
+             It also keeps earlier versions of each file and note (File, Version history). Turned \
+             off, Notepad starts with a new tab, asks whether to save your changes when you close \
+             it, and keeps no versions.",
             &restore,
         ));
 
@@ -259,6 +276,8 @@ impl Page {
             size,
             word_wrap,
             markdown,
+            line_numbers,
+            highlight_line,
             open_in,
             restore,
             families,
@@ -327,6 +346,16 @@ impl Page {
         });
         self.markdown.connect_active_notify(move |_| run());
         let run = on(|page| {
+            let on = page.line_numbers.is_active();
+            app().update_settings(|settings| settings.line_numbers = on);
+        });
+        self.line_numbers.connect_active_notify(move |_| run());
+        let run = on(|page| {
+            let on = page.highlight_line.is_active();
+            app().update_settings(|settings| settings.highlight_line = on);
+        });
+        self.highlight_line.connect_active_notify(move |_| run());
+        let run = on(|page| {
             let open_in =
                 OpenIn::ALL[(page.open_in.selected() as usize).min(OpenIn::ALL.len() - 1)];
             app().update_settings(|settings| settings.open_in = open_in);
@@ -379,6 +408,8 @@ impl Page {
         self.size.set_selected(index(nearest));
         self.word_wrap.set_active(settings.word_wrap);
         self.markdown.set_active(settings.markdown);
+        self.line_numbers.set_active(settings.line_numbers);
+        self.highlight_line.set_active(settings.highlight_line);
         self.open_in.set_selected(index(
             OpenIn::ALL
                 .iter()

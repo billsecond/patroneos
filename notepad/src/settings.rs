@@ -76,6 +76,9 @@ pub struct Settings {
     /// plain text like any other.
     pub markdown: bool,
     pub status_bar: bool,
+    pub side_panel: bool,
+    pub line_numbers: bool,
+    pub highlight_line: bool,
     pub open_in: OpenIn,
     /// Keep the open tabs and their unsaved changes when Notepad closes,
     /// and bring them back when it starts. Off, Notepad starts with an
@@ -95,6 +98,9 @@ impl Default for Settings {
             word_wrap: true,
             markdown: true,
             status_bar: true,
+            side_panel: false,
+            line_numbers: false,
+            highlight_line: false,
             open_in: OpenIn::NewTab,
             restore_session: true,
             match_case: false,
@@ -141,6 +147,9 @@ impl Settings {
             word_wrap: flag("view", "word-wrap", default.word_wrap),
             markdown: flag("view", "markdown", default.markdown),
             status_bar: flag("view", "status-bar", default.status_bar),
+            side_panel: flag("view", "side-panel", default.side_panel),
+            line_numbers: flag("view", "line-numbers", default.line_numbers),
+            highlight_line: flag("view", "highlight-line", default.highlight_line),
             open_in: string("files", "open-in")
                 .and_then(|key| OpenIn::ALL.into_iter().find(|open_in| open_in.key() == key))
                 .unwrap_or(default.open_in),
@@ -159,6 +168,9 @@ impl Settings {
         file.set_boolean("view", "word-wrap", self.word_wrap);
         file.set_boolean("view", "markdown", self.markdown);
         file.set_boolean("view", "status-bar", self.status_bar);
+        file.set_boolean("view", "side-panel", self.side_panel);
+        file.set_boolean("view", "line-numbers", self.line_numbers);
+        file.set_boolean("view", "highlight-line", self.highlight_line);
         file.set_string("files", "open-in", self.open_in.key());
         file.set_boolean("session", "restore", self.restore_session);
         file.set_boolean("find", "match-case", self.match_case);
@@ -191,6 +203,9 @@ mod tests {
             word_wrap: false,
             markdown: false,
             status_bar: false,
+            side_panel: true,
+            line_numbers: true,
+            highlight_line: true,
             open_in: OpenIn::NewWindow,
             restore_session: false,
             match_case: true,

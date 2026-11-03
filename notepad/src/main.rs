@@ -15,16 +15,20 @@
 
 mod about;
 mod app;
+mod commands;
 mod dialogs;
 mod document;
 mod find;
 mod formatted;
+mod gutter;
+mod history;
 mod live_style;
 mod markdown;
 mod print;
 mod session;
 mod settings;
 mod settings_page;
+mod sidepanel;
 mod tab;
 mod window;
 
