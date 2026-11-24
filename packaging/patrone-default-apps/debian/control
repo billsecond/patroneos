@@ -9,8 +9,12 @@ Vcs-Git: https://github.com/billsecond/patroneos.git
 
 Package: patrone-default-apps
 Architecture: all
-Depends: ${misc:Depends}, patrone-browser-chooser
-Recommends: patrone-file-manager, patrone-notepad, patrone-terminal, patrone-unpack
+Depends: ${misc:Depends}, patrone-browser-chooser, patrone-file-manager (>= 0.3.11)
+Recommends: patrone-notepad, patrone-terminal, patrone-unpack
+# Retiring Nautilus moved here from patrone-file-manager (0.3.11), files and
+# diversions both, so the file manager installed on its own leaves it be
+Breaks: patrone-file-manager (<< 0.3.11)
+Replaces: patrone-file-manager (<< 0.3.11)
 Description: PatroneOS's default apps
  PatroneOS comes with no web browser: until one's installed, web links
  open Patrone Browser Chooser, which asks which one to install. Whichever
@@ -18,4 +22,6 @@ Description: PatroneOS's default apps
  with Patrone Terminal. Folders open in Patrone File Manager, which takes
  Ubuntu's Files' place in the favorites, archives, .deb packages and
  Flatpak files in Patrone Unpack, and plain text in Notepad. Users' own
- choices still win.
+ choices still win. GNOME's Files (Nautilus) stays installed, for other
+ apps' file dialogs, but hidden, and "show in folder" opens Patrone File
+ Manager.

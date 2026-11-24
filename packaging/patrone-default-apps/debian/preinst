@@ -1,0 +1,33 @@
+#!/bin/sh
+# PatroneOS retires GNOME's Files (Nautilus) without removing it: Ubuntu's
+# session and GNOME's file dialogs for Snap and Flatpak apps need Nautilus.
+# Its menu entry is replaced by a hidden one, and the D-Bus service that
+# apps ask to "show a file in its folder" starts Patrone File Manager.
+# Nautilus's own files are kept as *.nautilus and come back when this
+# package is removed (postrm).
+#
+# patrone-file-manager did this before 0.3.11. Its diversions are taken over
+# as they are: Nautilus's files are already aside, so nothing is renamed.
+set -e
+
+diverted="
+/usr/share/applications/org.gnome.Nautilus.desktop
+/usr/share/dbus-1/services/org.freedesktop.FileManager1.service
+"
+
+if [ "$1" = install ] || [ "$1" = upgrade ]; then
+    for file in $diverted; do
+        case "$(dpkg-divert --listpackage "$file")" in
+            patrone-default-apps) ;;
+            patrone-file-manager)
+                dpkg-divert --package patrone-file-manager --remove --divert "$file.nautilus" "$file"
+                dpkg-divert --package patrone-default-apps --add --divert "$file.nautilus" "$file"
+                ;;
+            *)
+                dpkg-divert --package patrone-default-apps --add --rename --divert "$file.nautilus" "$file"
+                ;;
+        esac
+    done
+fi
+
+#DEBHELPER#

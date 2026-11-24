@@ -1,0 +1,20 @@
+#!/bin/sh
+# Puts back the Nautilus files that preinst moved aside.
+set -e
+
+diverted="
+/usr/share/applications/org.gnome.Nautilus.desktop
+/usr/share/dbus-1/services/org.freedesktop.FileManager1.service
+"
+
+case "$1" in
+    remove | abort-install | disappear)
+        for file in $diverted; do
+            if [ "$(dpkg-divert --listpackage "$file")" = patrone-default-apps ]; then
+                dpkg-divert --package patrone-default-apps --remove --rename --divert "$file.nautilus" "$file"
+            fi
+        done
+        ;;
+esac
+
+#DEBHELPER#
