@@ -23,7 +23,7 @@
 // band and the right-click menu.
 //
 // Patrone File Manager draws the icons, in a window of its own, clear but for
-// them and its small bar (desktopHost.js, file-manager/src/desktop.rs); this
+// them and its small bar (desktopHost.js, src/desktop.rs in billsecond/patrone-file-manager); this
 // keeps the pill, slides that window's actor out of the edge with the
 // wallpaper under it, and carries the Recycle Bin. Ubuntu's desktop icons
 // extension is off while File Manager draws the desktop; if it runs anyway,

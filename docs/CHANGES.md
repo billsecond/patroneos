@@ -17,19 +17,19 @@ the same change.
 | `patrone-branding` | The name, logos, wallpaper, boot splash, boot menu, login screen theme, `os-release` and `lsb-release`, `/etc/issue`, the message of the day, `/etc/legal`, mouse pointers, font settings, the installer's look, and Help in place of Ubuntu's (`ubuntu-docs`) | `branding/` |
 | `patrone-gnome-taskbar` | The taskbar and Start menu, as a GNOME Shell extension, until Patrone's own shell replaces GNOME Shell | `shell/gnome/` |
 | `patrone-settings` | Patrone Settings: taskbar, desktop, wallpaper, title bar buttons, theme, mouse pointer; also the engine behind GNOME Settings' Patrone page | `settings/` |
-| `patrone-terminal` | Patrone Terminal, the default terminal, in place of Ptyxis | `terminal/` |
+| `patrone-terminal` | Patrone Terminal, the default terminal, in place of Ptyxis | [billsecond/patrone-terminal](https://github.com/billsecond/patrone-terminal) |
 | `patrone-shell-config` | bash with Patrone's two-line prompt, zsh set up the same way, and pointers for Windows commands | [billsecond/patrone-shell-config](https://github.com/billsecond/patrone-shell-config) |
-| `patrone-file-manager` | File Manager, the app for folders, in place of Ubuntu's Files | `file-manager/` |
-| `patrone-task-manager` | Task Manager, in place of Resources; Ctrl+Shift+Esc opens it | `task-manager/` |
+| `patrone-file-manager` | File Manager, the app for folders, in place of Ubuntu's Files | [billsecond/patrone-file-manager](https://github.com/billsecond/patrone-file-manager) |
+| `patrone-task-manager` | Task Manager, in place of Resources; Ctrl+Shift+Esc opens it | [billsecond/patrone-task-manager](https://github.com/billsecond/patrone-task-manager) |
 | `patrone-notepad` | Notepad, the app for plain text and Markdown, in place of GNOME's Text Editor (which stays as the fallback) | [billsecond/patrone-notepad](https://github.com/billsecond/patrone-notepad) |
 | `patrone-unpack` | Patrone Unpack: archives, `.deb` packages and Flatpak files | [billsecond/patrone-unpack](https://github.com/billsecond/patrone-unpack) |
 | `patrone-software` | Patrone Software: GNOME Software with Patrone's picks, in place of Canonical's App Center | `software/` |
 | `patrone-browser-chooser` | No browser comes installed; this asks which to install the first time one's needed | `browser-chooser/` |
 | `patrone-default-apps` | Which app opens what (`mimeapps.list`), and the Start menu's pinned apps | `default-apps/` |
-| `patrone-remote-desktop` | One desktop per account, on the screen and over Remote Desktop, signed in with the account's own password | `remote-desktop/` |
+| `patrone-remote-desktop` | One desktop per account, on the screen and over Remote Desktop, signed in with the account's own password | [billsecond/patrone-remote-desktop](https://github.com/billsecond/patrone-remote-desktop) |
 | `patrone-installer` | Canonical's installer front end, built again as PatroneOS's ([below](#ubuntus-packages-built-again)) | `installer/` |
 | `patrone-guest-tools` | Hyper-V and VirtualBox guest support | [billsecond/patrone-guest-tools](https://github.com/billsecond/patrone-guest-tools) |
-| `patrone-hyperv-setup` | Virtual Machine Setup: offers what PatroneOS needs under Hyper-V | `hyperv-setup/` |
+| `patrone-hyperv-setup` | Virtual Machine Setup: offers what PatroneOS needs under Hyper-V | [billsecond/patrone-hyperv-setup](https://github.com/billsecond/patrone-hyperv-setup) |
 | `fonts-patroneos` | PatroneOS Sans, Mono, Document, Serif and Classic, from a release of [billsecond/patroneos-fonts](https://github.com/billsecond/patroneos-fonts) | `fonts/` |
 | `fonts-patrone-sans` | Transitional package for `fonts-patroneos` | `packaging/fonts-patrone-sans/` |
 
@@ -106,7 +106,7 @@ All from `patrone-desktop` (`desktop/README.md` has the table):
 
 ## Repositories
 
-PatroneOS is made in ten repositories, eight public and two private:
+PatroneOS is made in fifteen repositories, thirteen public and two private:
 
 | Repository | Visibility | Created | What it is |
 | --- | --- | --- | --- |
@@ -117,6 +117,11 @@ PatroneOS is made in ten repositories, eight public and two private:
 | [billsecond/patrone-unpack](https://github.com/billsecond/patrone-unpack) | Public | 2026-11-24 | Patrone Unpack, the same way (`packaging/patrone-unpack/release.txt`) |
 | [billsecond/patrone-shell-config](https://github.com/billsecond/patrone-shell-config) | Public | 2026-11-24 | The bash and zsh setup, the same way (`packaging/patrone-shell-config/release.txt`) |
 | [billsecond/patrone-guest-tools](https://github.com/billsecond/patrone-guest-tools) | Public | 2026-11-24 | The Hyper-V and VirtualBox guest tools, the same way (`packaging/patrone-guest-tools/release.txt`) |
+| [billsecond/patrone-terminal](https://github.com/billsecond/patrone-terminal) | Public | 2026-11-24 | Patrone Terminal, the same way (`packaging/patrone-terminal/release.txt`) |
+| [billsecond/patrone-file-manager](https://github.com/billsecond/patrone-file-manager) | Public | 2026-11-24 | Patrone File Manager, the same way (`packaging/patrone-file-manager/release.txt`) |
+| [billsecond/patrone-task-manager](https://github.com/billsecond/patrone-task-manager) | Public | 2026-11-24 | Patrone Task Manager, the same way (`packaging/patrone-task-manager/release.txt`) |
+| [billsecond/patrone-remote-desktop](https://github.com/billsecond/patrone-remote-desktop) | Public | 2026-11-24 | Patrone Remote Desktop, the same way (`packaging/patrone-remote-desktop/release.txt`) |
+| [billsecond/patrone-hyperv-setup](https://github.com/billsecond/patrone-hyperv-setup) | Public | 2026-11-24 | Patrone Virtual Machine Setup, the same way (`packaging/patrone-hyperv-setup/release.txt`) |
 | [billsecond/patroneos-fonts](https://github.com/billsecond/patroneos-fonts) | Public | 2026-10-29 | The five PatroneOS font families; `fonts-patroneos` packages a release of them (`fonts/release.txt`) |
 | `billsecond/patrone-website` | Private | 2026-10-28 | patroneos.com and its admin dashboard |
 | `billsecond/patroneos-archive` | Private | 2026-10-25 | The OS's history from before it went public, website included |

@@ -70,7 +70,7 @@ gnome-software --install=system/flatpak/flathub/<ID>/stable --interaction=full
 so Patrone Software opens on the browser's page, already installing it for
 everyone on the computer. On Patrone's desktops that asks for an
 administrator's password once (`patroneDesktopOnceActions` in
-`remote-desktop/data/patrone-desktops.rules`). The chooser shows
+`data/patrone-desktops.rules` in [billsecond/patrone-remote-desktop](https://github.com/billsecond/patrone-remote-desktop)). The chooser shows
 "Installing ..." meanwhile, with **Choose another browser** and **Close**
 (closing doesn't stop the install).
 

@@ -20,7 +20,7 @@ gi.require_version("Gtk", "4.0")
 gi.require_version("Vte", "3.91")
 from gi.repository import Gdk, GLib, Gtk, Pango, Vte  # noqa: E402
 
-# terminal/src/theme.rs
+# Patrone Terminal's src/theme.rs (billsecond/patrone-terminal)
 FONT = "PatroneOS Mono 11"
 FOREGROUND = "#D6DEEB"
 BACKGROUND = "#070A10"

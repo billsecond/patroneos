@@ -1,9 +1,0 @@
-#!/bin/sh
-set -e
-
-# Take the PAM hook out while its program is still installed.
-if [ "$1" = remove ]; then
-    pam-auth-update --package --remove patrone-remote-desktop
-fi
-
-#DEBHELPER#

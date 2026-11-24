@@ -1,0 +1,7 @@
+# Patrone Remote Desktop lives in its own repository, billsecond/patrone-remote-desktop. This pins the release
+# PatroneOS builds and publishes: its version, its source tarball (from the
+# release) and that tarball's SHA-256 (the release's SHA256SUMS).
+# packaging/release-source.sh reads it; see packaging/README.md.
+version=0.6.1
+url=https://github.com/billsecond/patrone-remote-desktop/releases/download/v0.6.1/patrone-remote-desktop-0.6.1.tar.gz
+sha256=66c1a3229e3345533ae5bc72a73b702eabb60d34cc1496b0ce45e7442d5aea04

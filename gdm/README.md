@@ -42,7 +42,7 @@ still only while the login screen starts, about a second.
 ## Unlocking a desktop
 
 Patrone's desktops have no seat: the screen shows them through a viewer in a
-session of its own (`remote-desktop/README.md`). Nothing locks them by itself
+session of its own ([billsecond/patrone-remote-desktop](https://github.com/billsecond/patrone-remote-desktop)). Nothing locks them by itself
 (`libexec/no-lock`), but the lock button and Super+L do. GDM then checks the
 password, asks logind to activate the session on its display's seat, and only
 after that unlocks it. logind refuses (`SessionNotOnSeat: Session 3 not on seat

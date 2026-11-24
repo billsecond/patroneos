@@ -1,0 +1,7 @@
+# Patrone Terminal lives in its own repository, billsecond/patrone-terminal. This pins the release
+# PatroneOS builds and publishes: its version, its source tarball (from the
+# release) and that tarball's SHA-256 (the release's SHA256SUMS).
+# packaging/release-source.sh reads it; see packaging/README.md.
+version=0.1.12
+url=https://github.com/billsecond/patrone-terminal/releases/download/v0.1.12/patrone-terminal-0.1.12.tar.gz
+sha256=dbf5e81a56a8f6c3a1e718cdb1645ecc530f65b8c120e92156d4df2b609946fd

@@ -46,7 +46,7 @@ when it's built. So Patrone builds Ubuntu's GNOME Settings
   GNOME's Remote Login drives gnome-remote-desktop's system daemon, which
   Patrone Remote Desktop turns off (both use port 3389). Without the
   package (the ISO's live session), the page is GNOME's as it was.
-  `remote-desktop/README.md` has how the switch's helper works.
+  [billsecond/patrone-remote-desktop](https://github.com/billsecond/patrone-remote-desktop)'s README has how the switch's helper works.
 - **Patrone as the maintainer** (revision 12; `docs/COMPLIANCE.md`, item
   13). `build.sh` makes the package's `Maintainer` Patrone's and
   `XSBC-Original-Maintainer` Ubuntu Developers, as Debian's guidelines for
@@ -125,7 +125,7 @@ for the right one. The same stand-in showed the switch's "on for other
 accounts" and off states, read again each time the tab was shown. Not
 tried: turning it on or off with a real administrator's password, and
 connecting with the hash Settings records (its PAM check and SAM entry
-were tried from the command line; see `remote-desktop/README.md`).
+were tried from the command line; see [billsecond/patrone-remote-desktop](https://github.com/billsecond/patrone-remote-desktop)).
 
 `1:50.3-0ubuntu0.2patrone11` (Remote Desktop first), the same way
 (2026-10-28), with `patrone-remote-desktop` 0.4.6 on the dev VM: all four

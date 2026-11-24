@@ -12,7 +12,7 @@
 // of its own, as the Recycle Bin's drop target, knows the two windows by
 // their titles, and places and stacks them. The two talk over File
 // Manager's standard input and output, a line at a time (the list is in
-// file-manager/src/desktop.rs). While it runs, Ubuntu's desktop icons
+// src/desktop.rs in billsecond/patrone-file-manager). While it runs, Ubuntu's desktop icons
 // extension is off, through GNOME's disabled-extensions; the taskbar turns
 // it back on if File Manager's desktop goes.
 

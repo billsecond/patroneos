@@ -3,7 +3,7 @@
 # Connection (mstsc) can connect to this VM with clipboard sharing. This does
 # the same thing as Settings → System → Remote Desktop. Patrone's own Remote
 # Desktop, where each account signs in once with its own password, is the
-# patrone-remote-desktop package instead (see remote-desktop/README.md); it
+# patrone-remote-desktop package instead (see billsecond/patrone-remote-desktop's README); it
 # replaces Remote Login on port 3389.
 #
 #   ./setup-remote-desktop.sh sharing   Desktop Sharing: shows the session you're

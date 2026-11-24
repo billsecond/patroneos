@@ -1,0 +1,7 @@
+# Patrone Task Manager lives in its own repository, billsecond/patrone-task-manager. This pins the release
+# PatroneOS builds and publishes: its version, its source tarball (from the
+# release) and that tarball's SHA-256 (the release's SHA256SUMS).
+# packaging/release-source.sh reads it; see packaging/README.md.
+version=0.2.6
+url=https://github.com/billsecond/patrone-task-manager/releases/download/v0.2.6/patrone-task-manager-0.2.6.tar.gz
+sha256=81e21c4d6411e41aa49839359634acef9ada577197b986d89531fa16bc0fcc2d
