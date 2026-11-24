@@ -20,6 +20,7 @@ Package: patrone-desktop
 Architecture: all
 Depends: ${misc:Depends},
          patrone-branding (>= 0.1.19),
+         dconf-cli,
          adduser,
          alsa-base,
          alsa-utils,
@@ -220,14 +221,18 @@ Recommends: apport,
             yaru-theme-icon,
             yaru-theme-sound
 # Removing update-manager and ubuntu-pro-client takes Ubuntu's metapackages,
-# which depend on them, with them.
+# which depend on them, with them. Patrone Task Manager takes Resources'
+# place (patrone-task-manager conflicted with it before 0.2.5, and installs
+# on its own now).
 Conflicts: apport-gtk, hwctl, ubuntu-advantage-desktop-daemon, ubuntu-insights,
            ubuntu-pro-client, ubuntu-report, update-manager, update-notifier,
-           whoopsie
+           whoopsie, resources
 Provides: update-notifier
 # The taskbar's ID is patrone-taskbar@patroneos.com from 0.4.8, and the
-# session mode (session/make-session-mode) names it
-Breaks: patrone-gnome-taskbar (<< 0.4.8)
+# session mode (session/make-session-mode) names it. Task Manager's
+# Ctrl+Shift+Esc and dconf profile moved here from patrone-task-manager (0.2.9)
+Breaks: patrone-gnome-taskbar (<< 0.4.8), patrone-task-manager (<< 0.2.5)
+Replaces: patrone-task-manager (<< 0.2.5)
 Description: PatroneOS's desktop
  Ubuntu's desktop with Patrone's branding and apps, and none of Canonical's
  own services: no Ubuntu Pro (its client, its services and its notices), no

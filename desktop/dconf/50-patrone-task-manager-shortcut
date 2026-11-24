@@ -1,4 +1,5 @@
-# Ctrl+Shift+Esc opens Patrone Task Manager. A custom shortcut of the
+# Ctrl+Shift+Esc opens Patrone Task Manager (patrone-desktop; it was
+# patrone-task-manager's 50-patrone-task-manager before 0.2.5). A custom shortcut of the
 # desktop's media keys, given here as a default rather than in a schema
 # override: a custom shortcut lives at a path of its own, which only dconf
 # can give values, and overriding the shared custom-keybinding schema would

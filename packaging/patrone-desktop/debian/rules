@@ -37,6 +37,13 @@ override_dh_auto_install:
 	install -d $(pkg)/usr/share/python-apt/templates
 	ln -s ubuntu.info $(pkg)/usr/share/python-apt/templates/patrone.info
 	ln -s ubuntu.mirrors $(pkg)/usr/share/python-apt/templates/patrone.mirrors
+	# Ctrl+Shift+Esc opens Task Manager: a custom shortcut in Patrone's dconf
+	# database, which postinst compiles, and the vendor profile that reads it
+	# (an administrator's /etc/dconf/profile/user takes its place). From
+	# patrone-task-manager before 0.2.5.
+	install -Dm644 dconf/50-patrone-task-manager-shortcut \
+	    $(pkg)/etc/dconf/db/patrone.d/50-patrone-task-manager-shortcut
+	install -Dm644 dconf/profile-user $(pkg)/usr/share/dconf/profile/user
 	# What the system connects to, and who runs each service
 	install -Dm644 connections.txt $(pkg)/usr/share/doc/patrone-desktop/connections.txt
 
