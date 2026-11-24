@@ -1,5 +1,7 @@
 #!/bin/sh
-# Puts back the Nautilus files that preinst moved aside.
+# Puts back Nautilus's files if this package still holds their diversions:
+# only a version before 0.3.11 made them, and postinst hands them back
+# (patrone-default-apps holds them on PatroneOS now).
 set -e
 
 diverted="
@@ -10,7 +12,9 @@ diverted="
 case "$1" in
     remove | abort-install | disappear)
         for file in $diverted; do
-            dpkg-divert --package patrone-file-manager --remove --rename --divert "$file.nautilus" "$file"
+            if [ "$(dpkg-divert --listpackage "$file")" = patrone-file-manager ]; then
+                dpkg-divert --package patrone-file-manager --remove --rename --divert "$file.nautilus" "$file"
+            fi
         done
         ;;
 esac

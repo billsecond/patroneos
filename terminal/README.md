@@ -32,7 +32,11 @@ The default terminal of PatroneOS: GTK4 and VTE, written in Rust.
   `~/.config/patrone-terminal/settings.ini` and apply to open terminals at
   once.
 - Tabs, 100,000 lines of scrollback, and xterm-style `-e` and `-T` options so
-  it can be the `x-terminal-emulator` alternative.
+  it can be the `x-terminal-emulator` alternative. Its priority there is 30,
+  under Ubuntu's own terminals (Ptyxis and GNOME Terminal, 40), so installing
+  it on Ubuntu doesn't change which terminal other programs open; PatroneOS
+  has no other terminal, and a Patrone Desktop session picks it through
+  `xdg-terminal-exec`.
 
 | Keys | Action |
 | --- | --- |
@@ -91,7 +95,9 @@ Ubuntu's terminal (Ptyxis) from the app grid. Deleting
 installs the same entry for everyone as
 `/etc/xdg/autostart/org.patrone.Terminal.desktop`. Its script stops if
 "Terminal at sign-in" in Patrone Settings is Off (the taskbar's
-`sign-in-terminal` setting). GNOME's login screen
+`sign-in-terminal` setting), and where there's no taskbar at all: on
+Ubuntu, with the terminal installed on its own, it opens only when it's
+asked for. GNOME's login screen
 doesn't run autostart entries, and a Patrone Desktop session opens its own
 terminal from the compositor.
 

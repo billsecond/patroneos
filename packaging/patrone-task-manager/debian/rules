@@ -22,12 +22,6 @@ override_dh_auto_install:
 	    $(pkg)/usr/share/applications/org.patrone.TaskManager.desktop
 	install -Dm644 data/org.patrone.TaskManager.svg \
 	    $(pkg)/usr/share/icons/hicolor/scalable/apps/org.patrone.TaskManager.svg
-	# Ctrl+Shift+Esc: a custom shortcut in Patrone's dconf database, which
-	# postinst compiles, and the vendor profile that reads it (an
-	# administrator's /etc/dconf/profile/user takes its place)
-	install -Dm644 data/dconf/50-patrone-task-manager \
-	    $(pkg)/etc/dconf/db/patrone.d/50-patrone-task-manager
-	install -Dm644 data/dconf/profile-user $(pkg)/usr/share/dconf/profile/user
 
 override_dh_auto_clean:
 	rm -rf target debian/cargo-home

@@ -9,3 +9,9 @@ override_dh_auto_install:
 	install -Dm644 mimeapps.list $(pkg)/etc/xdg/mimeapps.list
 	install -Dm644 91_patrone-default-apps.gschema.override \
 	    $(pkg)/usr/share/glib-2.0/schemas/91_patrone-default-apps.gschema.override
+	# In place of Nautilus's, which preinst moves aside: "show in folder"
+	# starts File Manager, and GNOME's Files is hidden (see preinst)
+	install -Dm644 retire-nautilus/org.freedesktop.FileManager1.service \
+	    $(pkg)/usr/share/dbus-1/services/org.freedesktop.FileManager1.service
+	install -Dm644 retire-nautilus/org.gnome.Nautilus.desktop \
+	    $(pkg)/usr/share/applications/org.gnome.Nautilus.desktop

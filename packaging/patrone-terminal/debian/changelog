@@ -1,3 +1,14 @@
+patrone-terminal (0.1.10) resolute; urgency=medium
+
+  * Opens at sign-in only on PatroneOS's desktop: where Patrone's taskbar
+    isn't installed (the terminal on its own, on Ubuntu), it opens only
+    when it's asked for.
+  * Its x-terminal-emulator priority is 30, under Ubuntu's terminals (40),
+    so installing it on Ubuntu doesn't change which terminal other programs
+    open.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 24 Nov 2026 09:00:00 -0600
+
 patrone-terminal (0.1.9) resolute; urgency=medium
 
   * Takes a new theme or title bar button style from Patrone Settings at
