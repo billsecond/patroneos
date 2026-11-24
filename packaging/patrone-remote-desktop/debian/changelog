@@ -1,3 +1,27 @@
+patrone-remote-desktop (0.6.0) resolute; urgency=medium
+
+  * The desktops (one per account, on the screen and remotely) are a switch
+    of their own, patrone-remote-desktop desktops on|off|status, so the
+    package can be installed on its own on Ubuntu and change nothing until
+    Remote Desktop is turned on. On PatroneOS they're on from the start
+    (when patrone-desktop is installed, or arrives later: a trigger on its
+    files). enable turns them on; disable turns them off again except on
+    PatroneOS or with Hyper-V's enhanced session on.
+  * With them off: Ubuntu's sessions stay on the login screen (desktops on
+    moves them aside and puts Patrone Desktop in place, from
+    /usr/share/patrone-remote-desktop), the PAM hook's profile is off (off
+    by default now), the drop-in for GDM's headless sessions isn't in
+    place (desktops on installs it in /etc/systemd/system), and the polkit
+    rule, the login-screen extension, the screen-lock autostart and the
+    enhanced session's service do nothing (a flag file,
+    /var/lib/patrone-remote-desktop/desktops-on).
+  * Upgrading from before 0.6.0, when they were always on, keeps them on
+    where they're used (PatroneOS, or Remote Desktop or the enhanced
+    session turned on) and gives the login screen its usual sessions back
+    elsewhere.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 24 Nov 2026 09:00:00 -0600
+
 patrone-remote-desktop (0.5.10) resolute; urgency=medium
 
   * Signing in on the screen no longer goes back to the login screen when the

@@ -40,6 +40,48 @@ if [ "$1" = configure ] && [ -x /usr/share/gdm/generate-config ] && [ -d /run/sy
     /usr/share/gdm/generate-config || true
 fi
 
+# The desktops (patrone-remote-desktop desktops on|off): each account's one
+# desktop, which the login screen's Patrone Desktop session shows. On
+# PatroneOS from the start; installed on its own, off until Remote Desktop
+# is turned on, so installing it changes nothing. Before 0.6.0 they were
+# always on: an upgrade keeps them where they're used (PatroneOS, Remote
+# Desktop or Hyper-V's enhanced session turned on), and gives the login
+# screen its usual sessions back elsewhere. With them on, the files they
+# put in place are put there again, as this version has them.
+flag=/var/lib/patrone-remote-desktop/desktops-on
+command=/usr/sbin/patrone-remote-desktop
+patroneos() {
+    [ -e /usr/libexec/patrone-desktop/make-session-mode ]
+}
+in_use() {
+    [ -d /run/systemd/system ] || return 1
+    for unit in patrone-remote-desktop-auth.socket patrone-remote-desktop.service \
+        patrone-remote-desktop-vmconnect.service; do
+        systemctl is-enabled --quiet "$unit" 2> /dev/null && return 0
+    done
+    return 1
+}
+if [ "$1" = configure ]; then
+    if [ -e "$flag" ]; then
+        "$command" desktops on --quiet > /dev/null
+    elif [ -z "$2" ]; then
+        if patroneos; then
+            "$command" desktops on --quiet > /dev/null
+        fi
+    elif dpkg --compare-versions "$2" lt 0.6.0~; then
+        if patroneos || in_use; then
+            "$command" desktops on --quiet > /dev/null
+        else
+            "$command" desktops off --quiet > /dev/null
+        fi
+    fi
+fi
+# (not when an administrator turned them off by hand: desktops-off)
+if [ "$1" = triggered ] && patroneos && [ ! -e "$flag" ] &&
+    [ ! -e /var/lib/patrone-remote-desktop/desktops-off ]; then
+    "$command" desktops on --quiet > /dev/null
+fi
+
 # On an upgrade, debhelper has stopped Remote Desktop (and was told not to
 # start it, since it's off until enabled), so start it again, with the new
 # plugin, if an administrator turned it on.

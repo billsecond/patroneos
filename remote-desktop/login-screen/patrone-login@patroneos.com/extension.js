@@ -5,6 +5,9 @@
 // both show it. GNOME's login screen would call that desktop a conflicting
 // session, offer to end it, and end it. This leaves sessions without a seat
 // out of that check. Should the check fail, it falls back to GNOME's own.
+// It does nothing while the desktops are off (patrone-remote-desktop
+// desktops off, the default outside PatroneOS): then GNOME's own check is
+// the one, as on any Ubuntu.
 //
 // Copyright 2026 William Daugherty
 // SPDX-License-Identifier: GPL-3.0-or-later
@@ -13,6 +16,7 @@
 // (_findConflictingSession), copyright the GNOME Shell authors,
 // GPL-2.0-or-later.
 
+import GLib from 'gi://GLib';
 import {Extension, InjectionManager} from 'resource:///org/gnome/shell/extensions/extension.js';
 import {LoginDialog} from 'resource:///org/gnome/shell/gdm/loginDialog.js';
 import * as LoginManager from 'resource:///org/gnome/shell/misc/loginManager.js';
@@ -44,8 +48,13 @@ async function findConflictingSession(startingSessionId) {
     return null;
 }
 
+// patrone-remote-desktop desktops on makes it, off removes it
+const DESKTOPS_ON = '/var/lib/patrone-remote-desktop/desktops-on';
+
 export default class PatroneLoginExtension extends Extension {
     enable() {
+        if (!GLib.file_test(DESKTOPS_ON, GLib.FileTest.EXISTS))
+            return;
         this._injections = new InjectionManager();
         this._injections.overrideMethod(LoginDialog.prototype, '_findConflictingSession',
             original => async function (startingSessionId) {
@@ -59,7 +68,7 @@ export default class PatroneLoginExtension extends Extension {
     }
 
     disable() {
-        this._injections.clear();
+        this._injections?.clear();
         this._injections = null;
     }
 }

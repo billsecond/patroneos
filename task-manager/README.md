@@ -2,9 +2,11 @@
 
 Patrone's task manager, packaged as `patrone-task-manager`: a Rust and GTK 4
 app that shows what's running and how hard the computer is working, and
-works the way people who have used Windows expect. It takes the place of
-Ubuntu's Resources app (`net.nokyan.Resources`), which the package
-conflicts with, and Ctrl+Shift+Esc opens it.
+works the way people who have used Windows expect. On PatroneOS it takes
+the place of Ubuntu's Resources app (`net.nokyan.Resources`), which
+`patrone-desktop` conflicts with, and Ctrl+Shift+Esc opens it. Installed
+on its own, on Ubuntu, it changes neither: Resources stays, and the
+shortcut is one to add in Settings (below).
 
 ```
 patrone-task-manager [--page processes|performance|history|startup|users|details|services]
@@ -151,14 +153,22 @@ Almost every entry is `NoDisplay`, so that isn't a reason to hide one.
 
 ## Ctrl+Shift+Esc
 
-A custom shortcut of the desktop's media keys ("Task Manager", running
-`patrone-task-manager`), shipped as a default in a dconf database of
-Patrone's own, the way ibus ships its settings:
+On PatroneOS, a custom shortcut of the desktop's media keys ("Task
+Manager", running `patrone-task-manager`), shipped as a default in a dconf
+database of Patrone's own, the way ibus ships its settings. It's
+`patrone-desktop`'s since 0.2.9 (this package's before 0.2.5), so the task
+manager installed on its own changes no system settings; there, Settings >
+Keyboard > Custom Shortcuts can add it, with `patrone-task-manager` as the
+command.
 
 | File | Installed as |
 | --- | --- |
-| `data/dconf/50-patrone-task-manager` | `/etc/dconf/db/patrone.d/50-patrone-task-manager`, compiled into `/etc/dconf/db/patrone` by `dconf update` in postinst (and removed in postrm) |
-| `data/dconf/profile-user` | `/usr/share/dconf/profile/user`: `user-db:user`, then `system-db:patrone` |
+| `desktop/dconf/50-patrone-task-manager-shortcut` | `/etc/dconf/db/patrone.d/50-patrone-task-manager-shortcut`, compiled into `/etc/dconf/db/patrone` by `dconf update` in `patrone-desktop`'s postinst (and removed in its postrm) |
+| `desktop/dconf/profile-user` | `/usr/share/dconf/profile/user`: `user-db:user`, then `system-db:patrone` |
+
+Upgrading this package from before 0.2.5 removes its old keyfile
+(`50-patrone-task-manager`, through `rm_conffile`) and compiles the
+database again, or removes it where nothing's left.
 
 Why not a schema override, as for Patrone's other defaults: a custom
 shortcut lives at a path of its own

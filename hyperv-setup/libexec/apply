@@ -9,7 +9,8 @@
 #                      services (and VirtualBox's guest tools)
 #   enhanced-session   install or update patrone-remote-desktop, whose
 #                      service serves VMConnect's enhanced session (0.5.0
-#                      and later), and turn that service on
+#                      and later), and turn that service on, with the
+#                      desktops it shows (0.6.0 and later)
 #
 # --dry-run says what it would do and needs no root: patrone-hyperv-setup
 # --dry-run runs it that way, for testing.
@@ -54,6 +55,12 @@ if (( ${#packages[@]} )); then
         -o Dpkg::Options::=--force-confold "${packages[@]}"
 fi
 if [[ -n $enable ]]; then
+    # The enhanced session shows each account's one desktop: from
+    # patrone-remote-desktop 0.6.0 those are off outside PatroneOS until
+    # they're turned on (before, always on, and no such command)
+    if [[ -n $dry_run ]] || patrone-remote-desktop desktops status > /dev/null 2>&1; then
+        run patrone-remote-desktop desktops on
+    fi
     run systemctl enable --now "$unit"
 fi
 if [[ -n $dry_run ]]; then

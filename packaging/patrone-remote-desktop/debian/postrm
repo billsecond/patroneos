@@ -1,14 +1,28 @@
 #!/bin/sh
 set -e
 
-# Ubuntu's own session comes back to the login screen.
+# What patrone-remote-desktop desktops on put in place goes, and Ubuntu's own
+# sessions come back to the login screen. (Before 0.6.0 the package itself
+# moved them aside, so they come back the same way.)
+sessions=/usr/share/wayland-sessions
 case "$1" in
     remove | abort-install | disappear)
+        if grep -qs /usr/libexec/patrone-remote-desktop/session "$sessions/gnome.desktop" &&
+            [ "$(dpkg-divert --listpackage "$sessions/gnome.desktop")" = patrone-remote-desktop ]; then
+            rm -f "$sessions/gnome.desktop"
+        fi
         for session in ubuntu gnome; do
-            dpkg-divert --package patrone-remote-desktop --remove --rename \
-                --divert "/usr/share/wayland-sessions/$session.desktop.patrone-hidden" \
-                "/usr/share/wayland-sessions/$session.desktop"
+            if [ "$(dpkg-divert --listpackage "$sessions/$session.desktop")" = patrone-remote-desktop ]; then
+                dpkg-divert --package patrone-remote-desktop --remove --rename \
+                    --divert "$sessions/$session.desktop.patrone-hidden" "$sessions/$session.desktop"
+            fi
         done
+        rm -f /etc/systemd/system/gnome-headless-session@.service.d/patrone-static-user.conf
+        rmdir --ignore-fail-on-non-empty /etc/systemd/system/gnome-headless-session@.service.d 2> /dev/null || true
+        rm -f /var/lib/patrone-remote-desktop/desktops-on
+        if [ -d /run/systemd/system ]; then
+            systemctl daemon-reload || true
+        fi
         ;;
 esac
 

@@ -1,3 +1,11 @@
+patrone-hyperv-setup (0.2.2) resolute; urgency=medium
+
+  * Setting up Hyper-V's enhanced session turns on the desktops it shows,
+    from patrone-remote-desktop 0.6.0, which keeps them off outside
+    PatroneOS until they're turned on.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 24 Nov 2026 09:00:00 -0600
+
 patrone-hyperv-setup (0.2.1) resolute; urgency=medium
 
   * The system's new name, PatroneOS (2026-10-29), in its messages, its

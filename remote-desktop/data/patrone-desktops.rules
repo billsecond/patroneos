@@ -111,8 +111,22 @@ function patroneSessionIsDesktop(session) {
     }
 }
 
+// The desktops are on (patrone-remote-desktop desktops on; off is the
+// default outside PatroneOS, and then this rule grants nothing, so GNOME's
+// own Remote Login sessions get Ubuntu's usual answers)
+function patroneDesktopsOn() {
+    try {
+        polkit.spawn(["/usr/bin/test", "-e", "/var/lib/patrone-remote-desktop/desktops-on"]);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 function patroneIsDesktop(subject) {
     if (subject.local)
+        return false;
+    if (!patroneDesktopsOn())
         return false;
     if (subject.session)
         return subject.active && !subject.seat && patroneSessionIsDesktop(subject.session);

@@ -5,6 +5,9 @@
 # account's own settings. On the machine's own screen it puts those back.
 # GNOME keeps these settings per account, not per session, and runs one
 # desktop session per account at a time, so the session that starts decides.
+# Nothing while the desktops are off (patrone-remote-desktop desktops off,
+# the default outside PatroneOS): GNOME's own Remote Login keeps its ways.
+[ -e /var/lib/patrone-remote-desktop/desktops-on ] || exit 0
 session=$(loginctl show-user "$USER" -p Display --value)
 [ -n "$session" ] || exit 0
 saved="${XDG_STATE_HOME:-$HOME/.local/state}/patrone/screen-lock-before-rdp"
