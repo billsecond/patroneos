@@ -30,7 +30,7 @@ the same change.
 | `patrone-installer` | Canonical's installer front end, built again as PatroneOS's ([below](#ubuntus-packages-built-again)) | `installer/` |
 | `patrone-guest-tools` | Hyper-V and VirtualBox guest support | `guest-tools/` |
 | `patrone-hyperv-setup` | Virtual Machine Setup: offers what PatroneOS needs under Hyper-V | `hyperv-setup/` |
-| `fonts-patroneos` | PatroneOS Sans, Mono, Document, Serif and Classic | `fonts/` |
+| `fonts-patroneos` | PatroneOS Sans, Mono, Document, Serif and Classic, from a release of [billsecond/patroneos-fonts](https://github.com/billsecond/patroneos-fonts) | `fonts/` |
 | `fonts-patrone-sans` | Transitional package for `fonts-patroneos` | `packaging/fonts-patrone-sans/` |
 
 Not shipped yet: Patrone's compositor (`compositor/`, Rust and Smithay).
@@ -104,8 +104,20 @@ All from `patrone-desktop` (`desktop/README.md` has the table):
 - The disc's list of sources (`casper/sources.manifest`) and the source
   bundle beside it (`iso/build-source.sh`).
 
+## Repositories
+
+PatroneOS is made in six repositories, four public and two private:
+
+| Repository | Visibility | Created | What it is |
+| --- | --- | --- | --- |
+| [billsecond/patroneos](https://github.com/billsecond/patroneos) | Public | 2026-10-28 | The OS itself: desktop, apps, packaging, ISO (this one) |
+| [billsecond/patrone-apt](https://github.com/billsecond/patrone-apt) | Public | 2026-10-28 | The apt repository installs get Patrone's updates from, on GitHub Pages (`packaging/publish.sh`) |
+| [billsecond/patrone-app-index](https://github.com/billsecond/patrone-app-index) | Public | 2026-10-27 | Patrone Software's app listings, which link to each app's own releases; it hosts no apps |
+| [billsecond/patroneos-fonts](https://github.com/billsecond/patroneos-fonts) | Public | 2026-10-29 | The five PatroneOS font families; `fonts-patroneos` packages a release of them (`fonts/release.txt`) |
+| `billsecond/patrone-website` | Private | 2026-10-28 | patroneos.com and its admin dashboard |
+| `billsecond/patroneos-archive` | Private | 2026-10-25 | The OS's history from before it went public, website included |
+
 ## Not part of the system
 
-The website (its own private repository), the app index
-(`billsecond/patrone-app-index`), the Discord set (`branding/discord/`) and
-the development scripts (`scripts/`).
+The website, the app index, the Discord set (`branding/discord/`) and the
+development scripts (`scripts/`).
