@@ -1,0 +1,7 @@
+# Patrone's shell setup lives in its own repository, billsecond/patrone-shell-config. This pins the release
+# PatroneOS builds and publishes: its version, its source tarball (from the
+# release) and that tarball's SHA-256 (the release's SHA256SUMS).
+# packaging/release-source.sh reads it; see packaging/README.md.
+version=0.3.2
+url=https://github.com/billsecond/patrone-shell-config/releases/download/v0.3.2/patrone-shell-config-0.3.2.tar.gz
+sha256=359dcb7c718783700a51fef1984efc9964b563ed590b1bf4cbd9bcf4369055f9

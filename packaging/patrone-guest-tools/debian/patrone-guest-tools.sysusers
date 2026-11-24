@@ -1,4 +1,0 @@
-# VBoxDRMClient (virtualbox-guest-x11) lets this group's session helper talk
-# to it; Ubuntu's packages make only vboxsf. Members are added on VirtualBox
-# by patrone-vbox-users.service.
-g vboxdrmipc - -

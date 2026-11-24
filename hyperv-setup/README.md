@@ -61,7 +61,7 @@ reload.
 
 | Part | Set up when | If not |
 | --- | --- | --- |
-| Integration services | `patrone-guest-tools` is installed (`guest-tools/README.md`) | **Set Up** installs it |
+| Integration services | `patrone-guest-tools` is installed ([billsecond/patrone-guest-tools](https://github.com/billsecond/patrone-guest-tools)) | **Set Up** installs it |
 | Enhanced session, Patrone's side | `patrone-remote-desktop-vmconnect.service` is running: Patrone's login screen in VMConnect, then the account's desktop, with the clipboard, sound and resizing (`remote-desktop/README.md`, "Hyper-V's enhanced session") | **Set Up** installs `patrone-remote-desktop`, or updates it if it's from before 0.5.0, and turns the service on |
 | Enhanced session, Windows' side | Hyper-V has opened an enhanced session with the VM | the PowerShell command for it |
 | Integration services, Windows' side | the host offers all six (shutdown, time, data exchange, heartbeat, backup, guest services) | the PowerShell command for it |
