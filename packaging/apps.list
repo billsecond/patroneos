@@ -20,7 +20,8 @@ patrone-unpack
 patrone-shell-config
 patrone-guest-tools
 patrone-hyperv-setup
-patrone-remote-desktop
+# patrone-remote-desktop joins once installing it no longer replaces the
+# login screen's sessions
 
 # Patrone Terminal and Notepad depend on it. fonts-patrone-sans, its
 # transitional package, isn't here: nothing outside PatroneOS ever had it.
