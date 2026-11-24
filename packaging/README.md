@@ -24,6 +24,9 @@ source. `build.sh` puts the two together and builds the `.deb` on the dev VM:
 ./gnome-software/build.sh
 ```
 
+A new package, or one that removes or replaces more of Ubuntu's, goes in
+`docs/CHANGES.md` in the same change.
+
 The packages land in `out/`. Install them with
 `sudo apt install ./out/patrone-terminal_0.1.1_amd64.deb` (apt pulls in the
 dependencies), and publish them to Patrone's apt repository with

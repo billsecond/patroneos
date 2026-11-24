@@ -7,7 +7,9 @@ Ubuntu provides the kernel, drivers, system services and package archive.
 Patrone Desktop is a new Wayland desktop (compositor, shell, lock screen,
 settings) that replaces GNOME. The build produces an installable ISO.
 
-See [docs/PLAN.md](docs/PLAN.md) for the approach, repo layout and milestones.
+See [docs/PLAN.md](docs/PLAN.md) for the approach, repo layout and milestones,
+and [docs/CHANGES.md](docs/CHANGES.md) for everything PatroneOS adds to
+Ubuntu, changes or takes out.
 
 PatroneOS has had its name since 2026-10-29. Its website is
 <https://patroneos.com>.
