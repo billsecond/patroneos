@@ -50,8 +50,16 @@ short=${commit:0:12}
 
 # Patrone's own source packages, which only its repository has
 own=" "
+# (an app with a repository of its own has a release.txt instead: its
+# source package is named after its folder)
+releases=()
 for dir in $(git -C "$root" ls-tree -d --name-only "$commit" packaging/); do
-    own+="$(git -C "$root" show "$commit:$dir/debian/control" | sed -n 's/^Source: *//p') "
+    if git -C "$root" cat-file -e "$commit:$dir/release.txt" 2> /dev/null; then
+        own+="${dir##*/} "
+        releases+=("$dir")
+    else
+        own+="$(git -C "$root" show "$commit:$dir/debian/control" | sed -n 's/^Source: *//p') "
+    fi
 done
 
 # Ubuntu's: what to fetch, and Patrone's rebuilds, for the README
@@ -105,6 +113,21 @@ xargs -P "$jobs" -L 1 bash -c 'fetch "$@"' _ <"$work/fetch"
 # Patrone's own source, and the installer's upstream source
 git -C "$root" archive --format=tar.gz --prefix="patroneos-$short/" \
     -o "$out/patrone/patroneos-$short.tar.gz" "$commit"
+# The apps with repositories of their own: the release tarball each
+# release.txt pinned at that commit, checked against its SHA-256
+app_tarballs=()
+for dir in "${releases[@]}"; do
+    pin=$(git -C "$root" show "$commit:$dir/release.txt")
+    url=$(sed -n 's/^url=//p' <<<"$pin")
+    sum=$(sed -n 's/^sha256=//p' <<<"$pin")
+    file=$out/patrone/${url##*/}
+    if ! echo "$sum  $file" | sha256sum -c --quiet 2> /dev/null; then
+        curl -fsSL -o "$file" "$url"
+        echo "$sum  $file" | sha256sum -c --quiet ||
+            { echo "build-source.sh: $url isn't the release $dir/release.txt pins" >&2; exit 1; }
+    fi
+    app_tarballs+=("${url##*/}")
+done
 build=$(git -C "$root" show "$commit:installer/build.sh")
 provision=$(sed -n 's/^provision_commit=//p' <<<"$build")
 flavor=$(sed -n 's/^flavor_version=//p' <<<"$build")
@@ -145,6 +168,17 @@ patrone/
     build is packaging/build.sh; the rebuilds' are their folders' build.sh.
     Rust packages fetch their crates, whose versions Cargo.lock fixes, from
     crates.io.
+EOF
+    if (( ${#app_tarballs[@]} )); then
+        cat <<EOF
+
+    ${app_tarballs[*]}:
+    the apps with repositories of their own, each at the release its
+    packaging/PACKAGE/release.txt pins: their source and debian/, which
+    packaging/build.sh builds the same way.
+EOF
+    fi
+    cat <<EOF
 
     ubuntu-desktop-provision-$provision.tar.gz: Canonical's installer front
     end at the commit Patrone's installer is built from

@@ -31,6 +31,18 @@ root=$(cd "$(dirname "$0")/.." && pwd)
 package=${1:?Usage: $0 PACKAGE [dpkg-buildpackage options]}
 shift
 
+build="$root/out/build"
+
+# An app with a repository of its own: the release packaging/PACKAGE/release.txt
+# pins, its source and debian/ from its tarball (release-source.sh)
+release="$root/packaging/$package/release.txt"
+if [[ -f $release ]]; then
+    version=$("$root/packaging/release-source.sh" "$package" version)
+    work="$build/$package-$version"
+    "$root/packaging/release-source.sh" "$package" unpack "$work"
+    debian="$work/debian"
+else
+
 case $package in
     patrone-terminal) source_dir=terminal ;;
     patrone-shell-config) source_dir=shell-config ;;
@@ -43,7 +55,6 @@ case $package in
     patrone-desktop) source_dir=desktop ;;
     patrone-unpack) source_dir=unpack ;;
     patrone-task-manager) source_dir=task-manager ;;
-    patrone-notepad) source_dir=notepad ;;
     patrone-browser-chooser) source_dir=browser-chooser ;;
     fonts-patroneos | fonts-patrone-sans) source_dir=fonts ;;
     patrone-software) source_dir=software ;;
@@ -58,6 +69,13 @@ esac
 
 debian="$root/packaging/$package/debian"
 version=$(dpkg-parsechangelog -l "$debian/changelog" -S Version)
+work="$build/$package-$version"
+
+rm -rf "$work"
+mkdir -p "$work"
+tar -C "$root/$source_dir" --exclude=./target -cf - . | tar -C "$work" -xf -
+cp -r "$debian" "$work/"
+fi
 
 # debhelper replaces its placeholder wherever it appears in a maintainer
 # script, comments included, so it must stand on a line of its own.
@@ -68,13 +86,6 @@ for script in "$debian"/{preinst,postinst,prerm,postrm}; do
         exit 1
     fi
 done
-build="$root/out/build"
-work="$build/$package-$version"
-
-rm -rf "$work"
-mkdir -p "$work"
-tar -C "$root/$source_dir" --exclude=./target -cf - . | tar -C "$work" -xf -
-cp -r "$debian" "$work/"
 
 if [[ -f $work/Cargo.toml ]]; then
     (cd "$work" && cargo vendor --locked --quiet vendor)

@@ -105,7 +105,19 @@ step_check() {
     done
     # Each of Patrone's packages' build dependencies, but Rust's (below)
     copy=$(mktemp)
-    for control in "$root"/packaging/*/debian/control; do
+    # (an app with a repository of its own: its pinned release's control)
+    controls=("$root"/packaging/*/debian/control)
+    for release in "$root"/packaging/*/release.txt; do
+        [ -e "$release" ] || continue
+        package=${release%/release.txt}
+        package=${package##*/}
+        unpacked=$(mktemp -d)
+        "$root/packaging/release-source.sh" "$package" unpack "$unpacked"
+        cp "$unpacked/debian/control" "$unpacked.control"
+        rm -rf "$unpacked"
+        controls+=("$unpacked.control")
+    done
+    for control in "${controls[@]}"; do
         sed -E '/^\s+(cargo|rustc)\b/d' "$control" >"$copy"
         unmet=$(dpkg-checkbuilddeps "$copy" 2>&1 |
             sed -n 's/.*[Uu]nmet build dependencies: //p' | sed 's/ ([^)]*)//g')
@@ -116,7 +128,10 @@ step_check() {
     done
     rm -f "$copy"
     # Rust, from rustup, as new as the packages ask
-    rust=$(sed -nE 's/^\s+rustc \(>= ([0-9.]+)\).*/\1/p' "$root"/packaging/*/debian/control | sort -V | tail -n 1)
+    rust=$(sed -nE 's/^\s+rustc \(>= ([0-9.]+)\).*/\1/p' "${controls[@]}" | sort -V | tail -n 1)
+    for control in "${controls[@]}"; do
+        case $control in "$root"/*) ;; *) rm -f "$control" ;; esac
+    done
     if ! command -v cargo >/dev/null || ! command -v rustc >/dev/null; then
         problems+=("Rust $rust or newer, from rustup (https://rustup.rs)")
     else
@@ -193,6 +208,14 @@ step_packages() {
         run "Building $package $(dpkg-parsechangelog -l "$changelog" -S Version)" "$package" \
             "$root/packaging/build.sh" "$package" "${options[@]}"
     done
+    # The apps with repositories of their own, from their pinned releases
+    for release in "$root"/packaging/*/release.txt; do
+        [ -e "$release" ] || continue
+        package=${release%/release.txt}
+        package=${package##*/}
+        run "Building $package $("$root/packaging/release-source.sh" "$package" version)" "$package" \
+            "$root/packaging/build.sh" "$package" -d
+    done
     for script in "${!rebuilds[@]}"; do
         run "Building Patrone's ${rebuilds[$script]}" "$script" "$root/$script/build.sh"
     done
@@ -203,6 +226,13 @@ step_packages() {
     for changelog in "$root"/packaging/*/debian/changelog; do
         source=$(dpkg-parsechangelog -l "$changelog" -S Source)
         version=$(dpkg-parsechangelog -l "$changelog" -S Version)
+        compgen -G "$out/debs/${source}_${version#*:}_*.deb" >/dev/null || die "no $source $version in $out/debs"
+    done
+    for release in "$root"/packaging/*/release.txt; do
+        [ -e "$release" ] || continue
+        source=${release%/release.txt}
+        source=${source##*/}
+        version=$("$root/packaging/release-source.sh" "$source" version)
         compgen -G "$out/debs/${source}_${version#*:}_*.deb" >/dev/null || die "no $source $version in $out/debs"
     done
     for script in "${!rebuilds[@]}"; do
