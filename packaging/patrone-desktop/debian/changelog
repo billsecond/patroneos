@@ -1,3 +1,12 @@
+patrone-desktop (0.2.9) resolute; urgency=medium
+
+  * Ctrl+Shift+Esc opens Task Manager from here, with Patrone's dconf
+    database and its profile, and Task Manager takes Resources' place
+    (Conflicts: resources): patrone-task-manager did both before 0.2.5,
+    and installs on its own now. Depends on dconf-cli.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 24 Nov 2026 09:00:00 -0600
+
 patrone-desktop (0.2.8) resolute; urgency=medium
 
   * Recommends Notepad (patrone-notepad), Patrone's plain text editor;
