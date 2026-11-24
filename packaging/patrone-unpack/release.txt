@@ -2,6 +2,6 @@
 # PatroneOS builds and publishes: its version, its source tarball (from the
 # release) and that tarball's SHA-256 (the release's SHA256SUMS).
 # packaging/release-source.sh reads it; see packaging/README.md.
-version=0.1.3
-url=https://github.com/billsecond/patrone-unpack/releases/download/v0.1.3/patrone-unpack-0.1.3.tar.gz
-sha256=10ca4fe969716e5a42bd0b8159e62b1d8fde649c18f7690ca1186a8d7492db71
+version=0.1.4
+url=https://github.com/billsecond/patrone-unpack/releases/download/v0.1.4/patrone-unpack-0.1.4.tar.gz
+sha256=e5246aeae1915d16953b6d5b9a153fe83def78213865e4f623a6e59af6e2cace
