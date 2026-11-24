@@ -30,12 +30,17 @@ case "$1" in
 esac
 
 # The compiled dconf database belongs to no package: remove it, and compile
-# it again if anything else still puts settings in patrone.d
+# it again if anything else still puts settings in patrone.d (dconf update
+# would make an empty one from an empty folder)
 case "$1" in
     remove | purge)
         rm -f /etc/dconf/db/patrone
-        if [ -d /etc/dconf/db/patrone.d ] && command -v dconf > /dev/null; then
-            dconf update || true
+        if [ -n "$(ls -A /etc/dconf/db/patrone.d 2> /dev/null)" ]; then
+            if command -v dconf > /dev/null; then
+                dconf update || true
+            fi
+        else
+            rmdir /etc/dconf/db/patrone.d 2> /dev/null || true
         fi
         ;;
 esac
