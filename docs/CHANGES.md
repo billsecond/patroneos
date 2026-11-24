@@ -36,6 +36,25 @@ the same change.
 Not shipped yet: Patrone's compositor (`compositor/`, Rust and Smithay).
 Today's desktop is GNOME Shell with Patrone's taskbar.
 
+## Patrone's apps on any Linux
+
+Each app's repository also releases it as a Flatpak, on the GNOME 50
+runtime, and Patrone's app index
+([billsecond/patrone-app-index](https://github.com/billsecond/patrone-app-index))
+lists them, so they install and update on any Linux with Flatpak:
+
+| App | ID | In the sandbox |
+| --- | --- | --- |
+| Notepad | `org.patrone.Notepad` | Portals only, PatroneOS's fonts in it |
+| Patrone Unpack | `org.patrone.Unpack` | Home and removable drives; installs Flatpak files with the computer's flatpak, but not `.deb` packages |
+| Patrone Terminal | `org.patrone.Terminal` | Runs the computer's shell (flatpak-spawn --host), with VTE 0.84 built in |
+| Patrone Task Manager | `org.patrone.TaskManager` | The computer's processes, through a small helper on it (glibc 2.34 or newer) |
+| Patrone File Manager | `org.patrone.FileManager` | Every file and drive, the computer's programs, files opened through the portal; no desktop |
+
+Shell config, the guest tools, Virtual Machine Setup and Remote Desktop set
+up the system itself, so they're `.deb` packages only, for Ubuntu 26.04 and
+systems built on it.
+
 ## Ubuntu's packages, built again
 
 Each is Ubuntu's package with Patrone's changes, its version Ubuntu's plus
