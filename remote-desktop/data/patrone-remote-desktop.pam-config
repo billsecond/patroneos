@@ -1,5 +1,5 @@
 Name: Patrone Remote Desktop - the NLA password hash, and the desktop at screen sign-in
-Default: yes
+Default: no
 Priority: 0
 Auth-Type: Additional
 Auth:

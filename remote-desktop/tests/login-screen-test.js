@@ -15,6 +15,15 @@ function session(id, user, seat, type, state) {
     return [id, 1000, user, seat, path];
 }
 
+// With the desktops off, the extension stays out of the way
+desktopsOn = false;
+const off = new PatroneLoginExtension();
+off.enable();
+expect(await new LoginDialog()._findConflictingSession('10') === 'GNOME\'s own check',
+    'with the desktops off, GNOME\'s own check');
+off.disable();
+desktopsOn = true;
+
 const extension = new PatroneLoginExtension();
 extension.enable();
 const dialog = new LoginDialog();
