@@ -1,2 +1,0 @@
-# Ctrl+Shift+Esc moved to patrone-desktop (0.2.9), as 50-patrone-task-manager-shortcut
-rm_conffile /etc/dconf/db/patrone.d/50-patrone-task-manager 0.2.5~

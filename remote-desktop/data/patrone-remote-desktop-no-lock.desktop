@@ -1,8 +1,0 @@
-[Desktop Entry]
-# Keeps Remote Desktop sessions from locking or blanking the screen
-# (/usr/libexec/patrone-remote-desktop/no-lock).
-Type=Application
-Name=Remote Desktop screen lock
-Comment=Turns the screen lock off in Remote Desktop sessions
-Exec=/usr/libexec/patrone-remote-desktop/no-lock
-NoDisplay=true

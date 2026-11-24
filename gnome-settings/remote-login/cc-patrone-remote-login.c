@@ -12,7 +12,7 @@
  * username, and a Remote Desktop Connection file (patrone-remote-desktop
  * rdp-file). Under that it says what the other ways in do: Desktop
  * Sharing (the next tab), Secure Shell and GNOME's Remote Login.
- * remote-desktop/README.md in Patrone's repository has the rest.
+ * billsecond/patrone-remote-desktop's README has the rest.
  *
  * Copyright (C) 2026 William Daugherty
  *

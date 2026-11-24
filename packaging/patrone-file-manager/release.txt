@@ -1,0 +1,7 @@
+# Patrone File Manager lives in its own repository, billsecond/patrone-file-manager. This pins the release
+# PatroneOS builds and publishes: its version, its source tarball (from the
+# release) and that tarball's SHA-256 (the release's SHA256SUMS).
+# packaging/release-source.sh reads it; see packaging/README.md.
+version=0.3.12
+url=https://github.com/billsecond/patrone-file-manager/releases/download/v0.3.12/patrone-file-manager-0.3.12.tar.gz
+sha256=a693a3c90ef22716353f1f3cf27d373280fe36fdcd42172b2dcafd1597aa87d2

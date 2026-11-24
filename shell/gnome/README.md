@@ -359,7 +359,7 @@ it on the desktop.
   hidden ones left out, as on the desktop: the same places, so turning the
   panel on or off moves nothing, and icons dragged about the panel are
   where they were left on the desktop too. Everything File Manager's desktop
-  does works here (`file-manager/README.md`, "The desktop"): opening, its
+  does works here ([billsecond/patrone-file-manager](https://github.com/billsecond/patrone-file-manager)'s README, "The desktop"): opening, its
   right-click menus (on the empty part, the desktop's own, with Open
   Desktop folder first), renaming in place, keys, the rubber band. A new
   folder or a paste on the empty desktop opens the panel on what it made.
@@ -403,7 +403,7 @@ panel then.
 ### The desktop and the panel: File Manager's windows
 
 Since 0.4.0 Patrone File Manager draws the desktop (`patrone-file-manager
---desktop`; `file-manager/README.md`, "The desktop"), and the taskbar
+--desktop`; [billsecond/patrone-file-manager](https://github.com/billsecond/patrone-file-manager)'s README, "The desktop"), and the taskbar
 hosts it (`desktopHost.js`): a Wayland app can't make its window the
 desktop or keep one above the others, so the shell does.
 
@@ -421,7 +421,7 @@ desktop or keep one above the others, so the shell does.
   GNOME's opening animation. Showing gives a window the keyboard; it goes
   back where it was.
 - **They talk over File Manager's standard input and output**, a line at a
-  time (the list is at the top of `file-manager/src/desktop.rs`): the
+  time (the list is at the top of `src/desktop.rs` in [billsecond/patrone-file-manager](https://github.com/billsecond/patrone-file-manager)): the
   screen's free area, the Recycle Bin (whether it's on the desktop, its
   place there, its size), the `desktop-files` setting and the panel
   opening and closing go to File Manager; the item count (the pill's tip
@@ -608,7 +608,7 @@ the taskbar follows when it's installed):
   all back.
 - **The screen-sharing indicator** is hidden in a desktop with no screen of
   its own, which is how Patrone's desktops run (see
-  `remote-desktop/README.md`): there the Remote Desktop connection the
+  [billsecond/patrone-remote-desktop](https://github.com/billsecond/patrone-remote-desktop)): there the Remote Desktop connection the
   desktop is seen through counts as screen sharing, so the indicator is
   always on, and any click on it (GNOME stops the sharing on a press of
   any button) cuts the connection. The user hit this by right-clicking

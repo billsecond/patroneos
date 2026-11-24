@@ -1,0 +1,7 @@
+# Virtual Machine Setup lives in its own repository, billsecond/patrone-hyperv-setup. This pins the release
+# PatroneOS builds and publishes: its version, its source tarball (from the
+# release) and that tarball's SHA-256 (the release's SHA256SUMS).
+# packaging/release-source.sh reads it; see packaging/README.md.
+version=0.2.3
+url=https://github.com/billsecond/patrone-hyperv-setup/releases/download/v0.2.3/patrone-hyperv-setup-0.2.3.tar.gz
+sha256=89c8cfc48665bfe4d1c780da71e2deceda3bf0154738133d7f3871a8efb5a3d6

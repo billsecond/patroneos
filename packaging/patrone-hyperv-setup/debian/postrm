@@ -1,9 +1,0 @@
-#!/bin/sh
-set -e
-
-# What patrone-hyperv-setup-seen.service noted
-if [ "$1" = purge ]; then
-    rm -rf /var/lib/patrone-hyperv-setup
-fi
-
-#DEBHELPER#

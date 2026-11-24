@@ -35,7 +35,7 @@ from PIL import Image, ImageFilter
 
 TOOLS = Path(__file__).resolve().parent
 
-# Patrone Terminal's background (terminal/src/theme.rs), which the logo is
+# Patrone Terminal's background (src/theme.rs in billsecond/patrone-terminal), which the logo is
 # matched against
 BACKGROUND = np.array([0x07, 0x0A, 0x10], dtype=float)
 # The wordmark: PATRONE in bold white, OS in bold Patrone Blue

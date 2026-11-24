@@ -1,3 +1,0 @@
-# PatroneOS's desktop arriving after this package (patrone-desktop's files):
-# the desktops go on then (postinst, triggered)
-interest-noawait /usr/libexec/patrone-desktop

@@ -46,7 +46,7 @@ instead. Two things about it matter:
 **Patrone's own Remote Desktop** is the `patrone-remote-desktop` package:
 each account signs in once, with its own Linux username and password, and
 lands on its own desktop, which never locks while connected. See
-`remote-desktop/README.md`. It takes port 3389 in place of Remote Login:
+[billsecond/patrone-remote-desktop](https://github.com/billsecond/patrone-remote-desktop). It takes port 3389 in place of Remote Login:
 
 ```
 sudo patrone-remote-desktop enable
@@ -96,7 +96,7 @@ Settings → System → Remote Desktop does the same thing through the GUI.
 
 `patrone-remote-desktop` 0.5.0 serves VMConnect's enhanced session on vsock
 port 3389: Patrone's login screen, then the account's own desktop
-(`remote-desktop/README.md`). The host needs the Hyper-V socket transport,
+([billsecond/patrone-remote-desktop](https://github.com/billsecond/patrone-remote-desktop)). The host needs the Hyper-V socket transport,
 with the VM shut down:
 
 ```

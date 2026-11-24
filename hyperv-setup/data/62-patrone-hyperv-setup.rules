@@ -1,8 +1,0 @@
-# Hyper-V opens an enhanced session over a Hyper-V socket to port 3389
-# (VMConnect, and Hyper-V's own check of whether one is available), which
-# arrives as a VMBus device whose class is that port's service ID. It does
-# that only when the VM is set to the Hyper-V socket transport, which Linux
-# needs, so patrone-hyperv-setup-seen.service notes it for Patrone Hyper-V
-# Setup.
-SUBSYSTEM=="vmbus", ACTION=="add", ATTR{class_id}=="{00000d3d-facb-11e6-bd58-64006a7986d3}", \
-  TAG+="systemd", ENV{SYSTEMD_WANTS}+="patrone-hyperv-setup-seen.service"

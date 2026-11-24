@@ -1,6 +1,0 @@
-# The login screen's extension, from patrone-remote-desktop: signing in on the
-# screen joins the account's desktop instead of ending it. GDM merges this
-# folder into its settings each time it starts, and the package's postinst
-# does too, so a login screen started after an upgrade has them.
-[org/gnome/shell]
-enabled-extensions=['patrone-login@patroneos.com']

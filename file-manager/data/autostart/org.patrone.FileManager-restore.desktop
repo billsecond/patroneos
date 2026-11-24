@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Restore File Manager windows and network drives
-Comment=Reconnects the mapped network drives, and reopens the folders that were open at the last sign-out when Folder Options says to
-Exec=patrone-file-manager --restore
-Icon=org.patrone.FileManager
-NoDisplay=true
-Terminal=false
