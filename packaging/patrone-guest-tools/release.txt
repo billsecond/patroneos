@@ -1,0 +1,7 @@
+# Patrone's guest tools lives in its own repository, billsecond/patrone-guest-tools. This pins the release
+# PatroneOS builds and publishes: its version, its source tarball (from the
+# release) and that tarball's SHA-256 (the release's SHA256SUMS).
+# packaging/release-source.sh reads it; see packaging/README.md.
+version=0.1.2
+url=https://github.com/billsecond/patrone-guest-tools/releases/download/v0.1.2/patrone-guest-tools-0.1.2.tar.gz
+sha256=b680b7e5272833b498e3d342de0edd4892bf1dc8403a36e6eb0b6fb43d50bc1c

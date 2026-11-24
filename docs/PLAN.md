@@ -123,7 +123,6 @@ gnome-software/        Patrone's build of GNOME Software: a Featured tab
                        (gnome-software)
 terminal/              Patrone Terminal
 file-manager/          Patrone File Manager (patrone-file-manager)
-shell-config/          bash prompt and zsh setup (patrone-shell-config)
 session/               session entry, systemd user units, defaults
 packaging/             Debian packaging for each component
 iso/                   ISO remaster scripts

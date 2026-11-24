@@ -11,7 +11,10 @@
 set -euo pipefail
 
 here=$(cd "$(dirname "$0")" && pwd)
-config="$here/../shell-config"
+# Patrone's shell setup, for --bashrc and --zshrc: a clone of
+# billsecond/patrone-shell-config, beside this repository's clone unless
+# PATRONE_SHELL_CONFIG says where
+config=${PATRONE_SHELL_CONFIG:-$here/../../patrone-shell-config}
 make_default=false
 autostart=false
 install_bashrc=false
@@ -25,6 +28,12 @@ for arg in "$@"; do
         *) echo "Unknown option: $arg" >&2; exit 1 ;;
     esac
 done
+
+if { $install_bashrc || $install_zshrc; } && [[ ! -f $config/bashrc ]]; then
+    echo "--bashrc and --zshrc need Patrone's shell setup: clone" >&2
+    echo "https://github.com/billsecond/patrone-shell-config to $config, or set PATRONE_SHELL_CONFIG" >&2
+    exit 1
+fi
 
 cargo install --locked --path "$here" --root ~/.local
 

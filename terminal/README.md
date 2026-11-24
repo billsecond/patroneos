@@ -123,8 +123,8 @@ root:
 ```
 
 A failed command's exit status shows on its own line under the command, and the
-prompt reports the directory to the terminal. It's `shell-config/bashrc`,
-loaded from `~/.bash_aliases` (`shell-config/bash_aliases`), which Ubuntu's
+prompt reports the directory to the terminal. It's `bashrc` in [billsecond/patrone-shell-config](https://github.com/billsecond/patrone-shell-config),
+loaded from `~/.bash_aliases` (its `bash_aliases`), which Ubuntu's
 own `~/.bashrc` already reads, so Ubuntu's bash setup stays as it is. Both
 ship in `patrone-shell-config`.
 
@@ -146,8 +146,8 @@ reads:
 sudo (Ubuntu's is sudo-rs) resets the environment, so nothing of the
 user's own prompt comes along.
 
-zsh is there for those who want it: `shell-config/zshrc` has the same prompt
+zsh is there for those who want it: its `zshrc` has the same prompt
 plus completion menus, shared history, `zsh-autosuggestions` and
-`zsh-syntax-highlighting`, and `shell-config/zprofile` makes login shells read
+`zsh-syntax-highlighting`, and its `zprofile` makes login shells read
 `~/.profile`, where Ubuntu keeps PATH additions such as `~/.local/bin`. To
 switch: `chsh -s /usr/bin/zsh`; to switch back: `chsh -s /bin/bash`.

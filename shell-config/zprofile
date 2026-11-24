@@ -1,8 +1,0 @@
-# PatroneOS's default ~/.zprofile, installed as /etc/skel/.zprofile.
-#
-# Login shells read this. Ubuntu keeps the login environment (PATH entries
-# such as ~/.local/bin, and what installers like rustup add) in ~/.profile,
-# which only sh-style shells read, so read it here too.
-if [[ -r ~/.profile ]]; then
-    emulate sh -c '. ~/.profile'
-fi

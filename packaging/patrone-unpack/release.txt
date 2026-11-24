@@ -1,0 +1,7 @@
+# Patrone Unpack lives in its own repository, billsecond/patrone-unpack. This pins the release
+# PatroneOS builds and publishes: its version, its source tarball (from the
+# release) and that tarball's SHA-256 (the release's SHA256SUMS).
+# packaging/release-source.sh reads it; see packaging/README.md.
+version=0.1.4
+url=https://github.com/billsecond/patrone-unpack/releases/download/v0.1.4/patrone-unpack-0.1.4.tar.gz
+sha256=e5246aeae1915d16953b6d5b9a153fe83def78213865e4f623a6e59af6e2cace
