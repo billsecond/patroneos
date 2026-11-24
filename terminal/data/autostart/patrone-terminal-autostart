@@ -7,8 +7,10 @@
 # so it gets a few seconds to appear.
 
 # "Terminal at sign-in" in Patrone Settings, the taskbar's setting: Off means
-# it doesn't open. With no taskbar there's no such setting, and it opens.
-choice=$(gsettings get org.gnome.shell.extensions.patrone-taskbar sign-in-terminal 2>/dev/null)
+# it doesn't open. With no taskbar there's no such setting: that's not
+# PatroneOS's desktop (the terminal installed on its own, on Ubuntu), so it
+# doesn't open either.
+choice=$(gsettings get org.gnome.shell.extensions.patrone-taskbar sign-in-terminal 2>/dev/null) || exit 0
 [ "$choice" = "'off'" ] && exit 0
 
 done_file=${XDG_CONFIG_HOME:-$HOME/.config}/gnome-initial-setup-done

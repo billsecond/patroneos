@@ -1,4 +1,4 @@
 Name: x-terminal-emulator
 Link: /usr/bin/x-terminal-emulator
 Alternative: /usr/bin/patrone-terminal
-Priority: 60
+Priority: 30
