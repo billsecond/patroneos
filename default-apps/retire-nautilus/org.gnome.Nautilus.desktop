@@ -1,6 +1,6 @@
 [Desktop Entry]
-# Patrone File Manager's package puts this in place of Nautilus's own entry
-# (kept as org.gnome.Nautilus.desktop.nautilus, back when the package goes).
+# patrone-default-apps puts this in place of Nautilus's own entry (kept as
+# org.gnome.Nautilus.desktop.nautilus, back when the package goes).
 # Nautilus stays installed: Ubuntu's session needs it, and GNOME's file
 # dialogs for Snap and Flatpak apps are drawn by it. Hidden, and opening no
 # file types, it no longer shows as a second file manager.
