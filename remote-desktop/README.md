@@ -23,8 +23,34 @@ works the way Windows users expect:
 
 ## Turning on Remote Desktop
 
-The screen part works as soon as the package is installed and GDM has
-restarted (a reboot): "Patrone Desktop" is the login screen's only session.
+**The desktops** (one desktop per account, which the screen, Remote Desktop
+and Hyper-V's enhanced session all show) are a switch of their own:
+
+```
+sudo patrone-remote-desktop desktops on|off|status
+```
+
+On PatroneOS they're on from the start: the package turns them on when
+`patrone-desktop` is installed, or arrives later (a dpkg trigger on its
+files; not again once an administrator has turned them off with
+`desktops off`). Installed on its own, on Ubuntu, they're off, and installing the
+package changes nothing: the login screen keeps Ubuntu's sessions, and no
+PAM hook, polkit rule, login-screen extension or GDM drop-in of this
+package does anything. `patrone-remote-desktop enable` turns them on, and
+`disable` turns them off again (except on PatroneOS, or with Hyper-V's
+enhanced session on, which uses them too); Virtual Machine Setup turns them
+on for the enhanced session. Either way the login screen shows the change
+from its next start (a reboot): with the desktops on, "Patrone Desktop" is
+its only session. `desktops off` turns off Remote Desktop and the enhanced
+session with them. A flag file, `/var/lib/patrone-remote-desktop/desktops-on`,
+says they're on: the polkit rule, the login-screen extension, the
+screen-lock autostart (`libexec/no-lock`) and the enhanced session's
+service (`ConditionPathExists`) each check it.
+
+Before 0.6.0 the desktops were always on. Upgrading keeps them on where
+they're used (PatroneOS, or Remote Desktop or the enhanced session turned
+on), and gives the login screen its usual sessions back elsewhere.
+
 Remote Desktop is off until an administrator turns it on and adds the
 accounts that may use it.
 
@@ -180,9 +206,10 @@ screen: GDM ─▶ "Patrone Desktop" session ───┘
    postinst (`/usr/share/gdm/generate-config`, as GDM's own reload does):
    otherwise a login screen started after an upgrade read the settings from
    before it, and after 0.5.5 renamed the extension, those named an ID that
-   was gone. Ubuntu's own session
-   (`ubuntu.desktop`) is moved aside, since a plain GNOME session started on
-   the screen would end the account's desktop. Patrone Desktop is
+   was gone. With the desktops on, Ubuntu's own session
+   (`ubuntu.desktop`) is moved aside (`dpkg-divert`, by `desktops on`, to
+   `*.patrone-hidden`), since a plain GNOME session started on the screen
+   would end the account's desktop. Patrone Desktop is
    `gnome.desktop`, because `gnome` is the session GDM falls back to for an
    account whose own choice isn't valid (like a remembered "ubuntu"); without
    it, GDM falls back to the first session file by name, which is GDM's own
@@ -190,7 +217,14 @@ screen: GDM ─▶ "Patrone Desktop" session ───┘
    background desktops (`X-GDM-CanRunHeadless`): `libexec/session` runs the
    viewer when the session has a seat, and Ubuntu's GNOME session
    (`gnome-session --session=ubuntu`) when it has none. A `gnome.desktop`
-   from any other package is moved aside too.
+   from any other package is moved aside too. The package installs Patrone
+   Desktop's as `/usr/share/patrone-remote-desktop/gnome.desktop`, and
+   `desktops on` puts it in `/usr/share/wayland-sessions`; it also installs
+   the drop-in for GDM's headless sessions
+   (`data/gnome-headless-session-static-user.conf`) in
+   `/etc/systemd/system/gnome-headless-session@.service.d/`, and turns on
+   the PAM hook (`pam-auth-update --enable`; its profile is off by
+   default). `desktops off` takes each away.
 
 7. **Permissions**: polkit, which decides what a session may do without an
    administrator's password, counts a session as local only when it has a

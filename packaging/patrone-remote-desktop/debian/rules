@@ -22,7 +22,10 @@ override_dh_auto_install:
 	install -Dm755 libexec/settings $(libexec)/settings
 	install -Dm644 data/org.patrone.remote-desktop.policy \
 	    $(pkg)/usr/share/polkit-1/actions/org.patrone.remote-desktop.policy
-	install -Dm644 data/gnome.desktop $(pkg)/usr/share/wayland-sessions/gnome.desktop
+	# patrone-remote-desktop desktops on puts these in place (in
+	# wayland-sessions, and as a drop-in for GDM's headless sessions)
+	install -Dm644 -t $(pkg)/usr/share/patrone-remote-desktop \
+	    data/gnome.desktop data/gnome-headless-session-static-user.conf
 	install -Dm644 -t $(pkg)/usr/share/gnome-shell/extensions/patrone-login@patroneos.com \
 	    login-screen/patrone-login@patroneos.com/extension.js \
 	    login-screen/patrone-login@patroneos.com/metadata.json
@@ -45,13 +48,12 @@ override_dh_auto_install:
 	    data/patrone-remote-desktop-greeter.socket data/patrone-remote-desktop-greeter@.service \
 	    data/patrone-remote-desktop-vmconnect-auth.socket \
 	    data/patrone-remote-desktop-vmconnect-auth@.service
-	install -Dm644 data/gnome-headless-session-static-user.conf \
-	    $(pkg)/usr/lib/systemd/system/gnome-headless-session@.service.d/patrone-static-user.conf
 	install -Dm644 README.md $(pkg)/usr/share/doc/patrone-remote-desktop/README.md
 
-# The machine's own screen always works, and so does Hyper-V's enhanced
-# session (its service starts only on Hyper-V). Remote Desktop is off until
-# an administrator runs patrone-remote-desktop enable.
+# The machine's own screen always works once the desktops are on, and so
+# does Hyper-V's enhanced session (its service starts only on Hyper-V, with
+# the desktops on). Remote Desktop is off until an administrator runs
+# patrone-remote-desktop enable.
 override_dh_installsystemd:
 	dh_installsystemd patrone-remote-desktop-console.socket
 	dh_installsystemd patrone-remote-desktop-vmconnect.service
