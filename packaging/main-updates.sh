@@ -4,7 +4,9 @@
 # hand. Two kinds of package:
 #
 # - Patrone's own (packaging/*/debian/changelog): each whose version on main
-#   is newer than the published one is built (packaging/build.sh).
+#   is newer than the published one is built (packaging/build.sh). An app
+#   with a repository of its own has packaging/*/release.txt instead: the
+#   release it pins, when newer, is built from its tarball.
 # - Patrone's builds of Ubuntu's GDM, GNOME Settings, GNOME Software,
 #   first-login setup and Language Support: a newer revision of Patrone's
 #   changes in gdm/build.sh, gnome-settings/build.sh, gnome-software/build.sh,
@@ -149,6 +151,27 @@ for changelog in "$root"/packaging/*/debian/changelog; do
     options=()
     if grep -qE '\b(cargo|rustc)\b' "$debian/control"; then options=(-d); fi
     build "$source" "$version" nice -n 19 "$root/packaging/build.sh" "$package" "${options[@]}"
+done
+
+# Patrone's apps with repositories of their own: the release each
+# packaging/PACKAGE/release.txt pins (release-source.sh), built from its
+# tarball. Moving a pin on main publishes it.
+for release in "$root"/packaging/*/release.txt; do
+    [ -e "$release" ] || continue
+    package=${release%/release.txt}
+    package=${package##*/}
+    source=$package
+    version=$("$root/packaging/release-source.sh" "$package" version)
+    have=${published[$source]:-}
+    if [ -n "$have" ] && dpkg --compare-versions "$version" le "$have"; then
+        continue
+    fi
+    echo "$source: main pins $version, the repository ${have:-none}"
+    behind=$((behind + 1))
+    [ -z "$check_only" ] || continue
+    # Rust comes from rustup, not Ubuntu's packages, so the Build-Depends
+    # check is skipped (the release's own CI builds it with Ubuntu's)
+    build "$source" "$version" nice -n 19 "$root/packaging/build.sh" "$package" -d
 done
 
 # Patrone's builds of Ubuntu's packages: a new revision of Patrone's changes

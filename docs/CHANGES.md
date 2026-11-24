@@ -21,7 +21,7 @@ the same change.
 | `patrone-shell-config` | bash with Patrone's two-line prompt, zsh set up the same way, and pointers for Windows commands | `shell-config/` |
 | `patrone-file-manager` | File Manager, the app for folders, in place of Ubuntu's Files | `file-manager/` |
 | `patrone-task-manager` | Task Manager, in place of Resources; Ctrl+Shift+Esc opens it | `task-manager/` |
-| `patrone-notepad` | Notepad, the app for plain text and Markdown, in place of GNOME's Text Editor (which stays as the fallback) | `notepad/` |
+| `patrone-notepad` | Notepad, the app for plain text and Markdown, in place of GNOME's Text Editor (which stays as the fallback) | [billsecond/patrone-notepad](https://github.com/billsecond/patrone-notepad) |
 | `patrone-unpack` | Patrone Unpack: archives, `.deb` packages and Flatpak files | `unpack/` |
 | `patrone-software` | Patrone Software: GNOME Software with Patrone's picks, in place of Canonical's App Center | `software/` |
 | `patrone-browser-chooser` | No browser comes installed; this asks which to install the first time one's needed | `browser-chooser/` |
@@ -106,13 +106,14 @@ All from `patrone-desktop` (`desktop/README.md` has the table):
 
 ## Repositories
 
-PatroneOS is made in six repositories, four public and two private:
+PatroneOS is made in seven repositories, five public and two private:
 
 | Repository | Visibility | Created | What it is |
 | --- | --- | --- | --- |
 | [billsecond/patroneos](https://github.com/billsecond/patroneos) | Public | 2026-10-28 | The OS itself: desktop, apps, packaging, ISO (this one) |
 | [billsecond/patrone-apt](https://github.com/billsecond/patrone-apt) | Public | 2026-10-28 | The apt repository installs get Patrone's updates from, on GitHub Pages (`packaging/publish.sh`) |
 | [billsecond/patrone-app-index](https://github.com/billsecond/patrone-app-index) | Public | 2026-10-27 | Patrone Software's app listings, which link to each app's own releases; it hosts no apps |
+| [billsecond/patrone-notepad](https://github.com/billsecond/patrone-notepad) | Public | 2026-11-24 | Notepad, with its history from this repository; `packaging/patrone-notepad/release.txt` pins the release PatroneOS builds |
 | [billsecond/patroneos-fonts](https://github.com/billsecond/patroneos-fonts) | Public | 2026-10-29 | The five PatroneOS font families; `fonts-patroneos` packages a release of them (`fonts/release.txt`) |
 | `billsecond/patrone-website` | Private | 2026-10-28 | patroneos.com and its admin dashboard |
 | `billsecond/patroneos-archive` | Private | 2026-10-25 | The OS's history from before it went public, website included |

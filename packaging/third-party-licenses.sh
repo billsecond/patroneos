@@ -77,7 +77,7 @@ echo "The Rust standard library"
 echo "================================================================"
 echo
 sysroot=$(rustc --print sysroot 2>/dev/null || true)
-# Run in MSYS2 on Windows (notepad/windows/build.ps1), rustc gives a Windows path
+# Run in MSYS2 on Windows (Notepad's windows/build.ps1, billsecond/patrone-notepad), rustc gives a Windows path
 if [[ -n $sysroot ]] && command -v cygpath > /dev/null; then
     sysroot=$(cygpath -u "$sysroot")
 fi

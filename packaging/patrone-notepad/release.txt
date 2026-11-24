@@ -1,0 +1,7 @@
+# Notepad lives in its own repository, billsecond/patrone-notepad. This pins
+# the release PatroneOS builds and publishes: its version, its source
+# tarball (from the release) and that tarball's SHA-256 (the release's
+# SHA256SUMS). packaging/release-source.sh reads it; see packaging/README.md.
+version=0.3.4
+url=https://github.com/billsecond/patrone-notepad/releases/download/v0.3.4/patrone-notepad-0.3.4.tar.gz
+sha256=d44a911553075c50914eebb3948ca035f27c60dd776b480c0bd135453e973927
