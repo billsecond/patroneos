@@ -1,3 +1,14 @@
+patrone-task-manager (0.2.5) resolute; urgency=medium
+
+  * Changes no system settings, so it can be installed on its own on
+    Ubuntu: Ctrl+Shift+Esc, Patrone's dconf database and its profile, and
+    taking Resources' place are PatroneOS's choices, and patrone-desktop
+    0.2.9 makes them now. Upgrading removes the old keyfile and compiles
+    what's left of the database, or removes it.
+  * No longer depends on dconf-cli.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 24 Nov 2026 09:00:00 -0600
+
 patrone-task-manager (0.2.4) resolute; urgency=medium
 
   * Takes a new theme or title bar button style from Patrone Settings at

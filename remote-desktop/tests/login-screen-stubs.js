@@ -6,6 +6,13 @@ import System from 'system';
 
 class Extension {}
 
+// The desktops' flag file (patrone-remote-desktop desktops on|off)
+let desktopsOn = true;
+const GLib = {
+    FileTest: {EXISTS: 1 << 4},
+    file_test: () => desktopsOn,
+};
+
 class InjectionManager {
     overrideMethod(prototype, name, createOverride) {
         prototype[name] = createOverride(prototype[name]);

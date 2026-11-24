@@ -26,10 +26,6 @@ override_dh_auto_install:
 	install -Dm644 data/org.patrone.FileManager.gschema.xml $(pkg)/usr/share/glib-2.0/schemas/org.patrone.FileManager.gschema.xml
 	# Reopens folders at sign-in, only when Folder Options says to
 	install -Dm644 data/autostart/org.patrone.FileManager-restore.desktop $(pkg)/etc/xdg/autostart/org.patrone.FileManager-restore.desktop
-	# In place of Nautilus's, which preinst moves aside: "show in folder"
-	# starts File Manager, and GNOME's Files is hidden (see preinst)
-	install -Dm644 data/retire-nautilus/org.freedesktop.FileManager1.service $(pkg)/usr/share/dbus-1/services/org.freedesktop.FileManager1.service
-	install -Dm644 data/retire-nautilus/org.gnome.Nautilus.desktop $(pkg)/usr/share/applications/org.gnome.Nautilus.desktop
 
 override_dh_auto_clean:
 	rm -rf target debian/cargo-home

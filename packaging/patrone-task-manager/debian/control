@@ -13,10 +13,8 @@ Vcs-Git: https://github.com/billsecond/patroneos.git
 
 Package: patrone-task-manager
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, dconf-cli
+Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: pkexec
-Conflicts: resources
-Replaces: resources
 Description: Patrone's task manager: apps, processes, performance, services
  Patrone Task Manager shows the apps and processes running and what each
  uses (processor, memory, disk and network), and ends them; how hard the
@@ -25,5 +23,6 @@ Description: Patrone's task manager: apps, processes, performance, services
  sign-in, with a switch to turn each off; who is signed in; every process
  in detail; and the system's services, with Start, Stop and Restart.
  .
- Ctrl+Shift+Esc opens it, through a shortcut each account can change or
- remove in Settings. It takes the place of Ubuntu's Resources app.
+ On PatroneOS, Ctrl+Shift+Esc opens it, through a shortcut each account
+ can change or remove in Settings, and it takes the place of Ubuntu's
+ Resources app. Installed on its own, it changes neither.

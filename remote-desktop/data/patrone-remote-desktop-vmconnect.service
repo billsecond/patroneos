@@ -3,6 +3,9 @@ Description=Patrone Remote Desktop for Hyper-V's enhanced session
 Documentation=file:///usr/share/doc/patrone-remote-desktop/README.md
 # Hyper-V's host is the only one that can connect to a Hyper-V socket.
 ConditionVirtualization=microsoft
+# It shows the account's one desktop, so only while the desktops are on
+# (patrone-remote-desktop desktops on; Virtual Machine Setup turns them on)
+ConditionPathExists=/var/lib/patrone-remote-desktop/desktops-on
 After=gdm.service patrone-remote-desktop-greeter.socket patrone-remote-desktop-vmconnect-auth.socket
 Wants=patrone-remote-desktop-greeter.socket patrone-remote-desktop-vmconnect-auth.socket
 # scripts/hyperv/guest's bridge, from before this, listens on the same port.

@@ -1,6 +1,8 @@
 [Desktop Entry]
-# Installed as /usr/share/wayland-sessions/gnome.desktop by
-# patrone-remote-desktop. "gnome" is the session GDM falls back to for
+# patrone-remote-desktop installs this as
+# /usr/share/patrone-remote-desktop/gnome.desktop, and patrone-remote-desktop
+# desktops on puts it in /usr/share/wayland-sessions (off takes it away).
+# "gnome" is the session GDM falls back to for
 # accounts with no valid session of their own (Ubuntu's ubuntu.desktop is
 # moved aside), so every account gets Patrone Desktop. libexec/session runs
 # the screen's viewer when the session has a seat, and the account's GNOME

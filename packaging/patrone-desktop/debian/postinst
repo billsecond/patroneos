@@ -39,6 +39,13 @@ if [ "$1" = configure ]; then
     fi
 fi
 
+# Compile Patrone's dconf database (/etc/dconf/db/patrone) from patrone.d,
+# as ibus does its own: Ctrl+Shift+Esc for Task Manager. Signed-in accounts
+# read it from their next sign-in, when the profile is read.
+if [ "$1" = configure ] && command -v dconf > /dev/null; then
+    dconf update
+fi
+
 # Patrone's session mode, from Ubuntu's (preinst moved it aside), and again
 # whenever gnome-shell-common brings a new one (the modes folder's trigger).
 # It counts from the next sign-in.

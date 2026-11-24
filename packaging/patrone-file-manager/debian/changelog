@@ -1,3 +1,12 @@
+patrone-file-manager (0.3.11) resolute; urgency=medium
+
+  * Leaves GNOME's Files (Nautilus) as it is, so it can be installed on its
+    own on Ubuntu: hiding Files and sending "show in folder" here is
+    PatroneOS's choice, and patrone-default-apps 0.2.4 makes it now. A
+    system without patrone-default-apps gets Nautilus's files back.
+
+ -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 24 Nov 2026 09:00:00 -0600
+
 patrone-file-manager (0.3.10) resolute; urgency=medium
 
   * The desktop files panel in place of the bubble: the desktop's icons in

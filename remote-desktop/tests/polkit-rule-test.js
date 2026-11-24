@@ -33,6 +33,7 @@ const cgroups = {
     104: '0::/user.slice/user-1003.slice/user@1003.service/session.slice/org.gnome.Shell@ubuntu.service\n',
 };
 let rule = null;
+let desktopsOn = true;
 const polkit = {
     Result: {YES: 'yes', NO: 'no', NOT_HANDLED: 'not handled'},
     addRule(fn) {
@@ -40,6 +41,11 @@ const polkit = {
     },
     spawn(argv) {
         const command = argv.join(' ');
+        if (command === '/usr/bin/test -e /var/lib/patrone-remote-desktop/desktops-on') {
+            if (!desktopsOn)
+                throw new Error('exit status 1');
+            return '';
+        }
         if (argv[0] === '/usr/bin/loginctl' && argv[1] === 'show-session') {
             const props = sessions[argv[2]];
             if (!props)
@@ -133,6 +139,11 @@ expect('not with no display session', `${NM}.network-control`,
     {...service, user: 'nobody', pid: 103}, 'not handled');
 expect('not when the display session isn\'t active', `${NM}.network-control`,
     {...service, user: 'gone', pid: 104}, 'not handled');
+
+desktopsOn = false;
+expect('nothing while the desktops are off', `${NM}.network-control`, {}, 'not handled');
+expect('not for a desktop service either', `${NM}.network-control`, service, 'not handled');
+desktopsOn = true;
 
 if (failures)
     System.exit(1);
