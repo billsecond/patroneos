@@ -111,7 +111,7 @@ PatroneOS is made in six repositories, four public and two private:
 | Repository | Visibility | Created | What it is |
 | --- | --- | --- | --- |
 | [billsecond/patroneos](https://github.com/billsecond/patroneos) | Public | 2026-10-28 | The OS itself: desktop, apps, packaging, ISO (this one) |
-| [billsecond/patrone-apt](https://github.com/billsecond/patrone-apt) | Public | 2026-10-28 | The apt repository installs get Patrone's updates from, on GitHub Pages (`packaging/publish.sh`) |
+| [billsecond/patrone-apt](https://github.com/billsecond/patrone-apt) | Public | 2026-10-28 | The apt repository installs get Patrone's updates from, on GitHub Pages (`packaging/publish.sh`); its `apps` component has only Patrone's apps, for Ubuntu (`packaging/apps.list`) |
 | [billsecond/patrone-app-index](https://github.com/billsecond/patrone-app-index) | Public | 2026-10-27 | Patrone Software's app listings, which link to each app's own releases; it hosts no apps |
 | [billsecond/patroneos-fonts](https://github.com/billsecond/patroneos-fonts) | Public | 2026-10-29 | The five PatroneOS font families; `fonts-patroneos` packages a release of them (`fonts/release.txt`) |
 | `billsecond/patrone-website` | Private | 2026-10-28 | patroneos.com and its admin dashboard |

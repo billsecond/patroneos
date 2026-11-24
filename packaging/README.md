@@ -100,6 +100,7 @@ installs its source, key and pins (`desktop/README.md`, "Updates").
 ./packaging/publish.sh gdm3                    # with libgdm1 and the rest of that build
 ./packaging/publish.sh out/patrone-desktop_0.2.1_all.deb
 ./packaging/publish.sh --all                   # the newest build of every package in out/
+./packaging/publish.sh --index                 # no debs: the apps index, if apps.list changed
 ./packaging/publish.sh --dry-run --all         # what would change
 ```
 
@@ -108,6 +109,17 @@ index (`dists/resolute`) and signs it, commits and pushes it to
 `~/src/patrone-apt`, and GitHub Pages has it a minute or two later. A
 package already published at that version or newer is skipped. Every
 install takes what's published, by itself, within a day.
+
+The index has two components. `main` has every package; PatroneOS uses
+it. `apps` is Patrone's apps for Ubuntu and systems built on it
+(`patrone-apps.sources` in billsecond/patrone-apt, whose README says how to
+add it): the same stanzas and pool files as `main`, but only the packages
+`apps.list` names. Each publish writes both. A package added to
+`apps.list` reaches `apps` at its next publish, or at once with `--index`
+from `main`. `apps.list` must never name Patrone's builds of Ubuntu's
+packages or what makes a system PatroneOS (`patrone-desktop`, `-branding`,
+`-settings` and the like): `publish.sh` stops, before uploading anything,
+if a package it names has `patrone` in its version.
 
 **Merges publish themselves, within a day.** `main-updates.sh` builds every
 package whose version on `main` is newer than the published one, and a new
