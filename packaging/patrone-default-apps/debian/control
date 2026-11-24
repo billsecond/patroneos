@@ -9,11 +9,14 @@ Vcs-Git: https://github.com/billsecond/patroneos.git
 
 Package: patrone-default-apps
 Architecture: all
-Depends: ${misc:Depends}, patrone-browser-chooser, patrone-file-manager (>= 0.3.11)
-Recommends: patrone-notepad, patrone-terminal, patrone-unpack
 # Retiring Nautilus moved here from patrone-file-manager (0.3.11), files and
-# diversions both, so the file manager installed on its own leaves it be
-Breaks: patrone-file-manager (<< 0.3.11)
+# diversions both, so the file manager installed on its own leaves it be. A
+# package can't remove another's diversions: the file manager's 0.3.11 gives
+# its own back when it's configured, which has to come before this package
+# is unpacked and makes them again (preinst), hence Pre-Depends.
+Pre-Depends: patrone-file-manager (>= 0.3.11)
+Depends: ${misc:Depends}, patrone-browser-chooser
+Recommends: patrone-notepad, patrone-terminal, patrone-unpack
 Replaces: patrone-file-manager (<< 0.3.11)
 Description: PatroneOS's default apps
  PatroneOS comes with no web browser: until one's installed, web links

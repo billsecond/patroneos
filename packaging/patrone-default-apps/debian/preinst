@@ -6,8 +6,10 @@
 # Nautilus's own files are kept as *.nautilus and come back when this
 # package is removed (postrm).
 #
-# patrone-file-manager did this before 0.3.11. Its diversions are taken over
-# as they are: Nautilus's files are already aside, so nothing is renamed.
+# patrone-file-manager did this before 0.3.11. A package can't remove
+# another's diversions, so this package pre-depends on the file manager's
+# 0.3.11, whose postinst gives its own back to Nautilus first; then they're
+# made again here, for this package.
 set -e
 
 diverted="
@@ -17,16 +19,7 @@ diverted="
 
 if [ "$1" = install ] || [ "$1" = upgrade ]; then
     for file in $diverted; do
-        case "$(dpkg-divert --listpackage "$file")" in
-            patrone-default-apps) ;;
-            patrone-file-manager)
-                dpkg-divert --package patrone-file-manager --remove --divert "$file.nautilus" "$file"
-                dpkg-divert --package patrone-default-apps --add --divert "$file.nautilus" "$file"
-                ;;
-            *)
-                dpkg-divert --package patrone-default-apps --add --rename --divert "$file.nautilus" "$file"
-                ;;
-        esac
+        dpkg-divert --package patrone-default-apps --add --rename --divert "$file.nautilus" "$file"
     done
 fi
 

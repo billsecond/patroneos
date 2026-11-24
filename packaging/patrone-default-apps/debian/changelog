@@ -3,8 +3,9 @@ patrone-default-apps (0.2.4) resolute; urgency=medium
   * Retires GNOME's Files (Nautilus) in patrone-file-manager's place: the
     hidden menu entry and the FileManager1 D-Bus service that starts
     Patrone File Manager, with Nautilus's own files diverted as before.
-    The diversions are taken over as they are. Depends on
-    patrone-file-manager (>= 0.3.11), which no longer does it.
+    Pre-depends on patrone-file-manager (>= 0.3.11), which no longer does
+    it and gives its own diversions back first: a package can't remove
+    another's.
 
  -- William Daugherty <31995458+billsecond@users.noreply.github.com>  Tue, 24 Nov 2026 09:00:00 -0600
 
