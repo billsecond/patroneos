@@ -1,0 +1,29 @@
+# The packages in the apt repository's "apps" component: Patrone's apps, for
+# Ubuntu 26.04 and systems built on it, without the rest of PatroneOS.
+# publish.sh writes that component's index from main's, keeping only these
+# (the same pool files; nothing leaves main). One binary package per line.
+#
+# Never list what would turn Ubuntu into PatroneOS or replace Ubuntu's own
+# packages: Patrone's builds of Ubuntu's packages (gdm3, gnome-control-center,
+# gnome-software, gnome-initial-setup, language-selector: publish.sh refuses
+# a version with "patrone" in it), or patrone-desktop, patrone-branding,
+# patrone-default-apps, patrone-settings, patrone-gnome-taskbar,
+# patrone-software, patrone-installer and patrone-browser-chooser.
+#
+# A package listed here that isn't published yet is left out until it is.
+
+patrone-terminal
+patrone-file-manager
+patrone-notepad
+patrone-task-manager
+patrone-unpack
+patrone-shell-config
+patrone-guest-tools
+patrone-hyperv-setup
+# Installing it changes nothing until "patrone-remote-desktop desktops on"
+# (0.6.0 and later)
+patrone-remote-desktop
+
+# Patrone Terminal and Notepad depend on it. fonts-patrone-sans, its
+# transitional package, isn't here: nothing outside PatroneOS ever had it.
+fonts-patroneos
